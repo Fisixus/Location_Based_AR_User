@@ -27,6 +27,16 @@ public class SymbolManager : MonoBehaviour
 
         changedImage.texture = textureList[0];
         changedImageCategoryName.text = Category.Ambulance.ToString();
+
+        username.text = PlayerPrefs.GetString("Username");
+        InvokeRepeating("CallUserSymbols", 3f, 4f);
+        //Invoke("RefreshArcMap", 3f);
+        //Invoke("RefreshContentMap", 3f);
+    }
+
+    private void CallUserSymbols()
+    {
+        WebServiceManager.Instance.GetSymbols(UserManager.Instance.FindUserUUIDbyUsername(username.text));
     }
 
     private void Update()
@@ -73,16 +83,13 @@ public class SymbolManager : MonoBehaviour
         string latitudeDATA = addSymbolPanel.transform.Find("ScrollView/ContentPanel/LatitudeDATA").GetComponent<InputField>().text.Trim();
         string longitudeDATA = addSymbolPanel.transform.Find("ScrollView/ContentPanel/LongitudeDATA").GetComponent<InputField>().text.Trim();
         string altitudeDATA = addSymbolPanel.transform.Find("ScrollView/ContentPanel/AltitudeDATA").GetComponent<InputField>().text.Trim();
-        string messageDATA = addSymbolPanel.transform.Find("ScrollView/ContentPanel/MessageDATA").GetComponentInChildren<TMP_InputField>().text.Trim();
+        string messageDATA = addSymbolPanel.transform.Find("ScrollView/ContentPanel/MessageDATA").GetComponentInChildren<InputField>().text.Trim();
 
         //categorydata is non-editable in the panel
         string categoryDATA = textureList[textureIndex].name;
 
-        //TODO teke name data from user options
-        string symbolOwnerDATA = username.text;
-
-        //TODO CHANGE WITH GETUSERSYMBOLS SERVICE
-        bool nameIsValid = ControlNameIsValid(symbolOwnerDATA, symbolNameDATA);
+        ///control for unique symbol names for the each user
+        bool nameIsValid = ControlNameIsValid(symbolNameDATA);
 
 
         bool postControl = (decimal.TryParse(longitudeDATA.ToString().Trim(), out result)) && (decimal.TryParse(latitudeDATA.ToString().Trim(), out result)) && (decimal.TryParse(altitudeDATA.ToString().Trim(), out result)) && (Enum.TryParse(categoryDATA, out category)) && (nameIsValid) && (!symbolNameDATA.Equals(""));
@@ -110,7 +117,7 @@ public class SymbolManager : MonoBehaviour
             symbol.Message = messageDATA;
             //Debug.Log("MessageData:" + messageDATA);
             //Debug.Log("SymbolOwner:" + symbolOwnerDATA);
-            symbol.UserUUID = UserManager.Instance.FindUserUUIDbyUsername(symbolOwnerDATA);
+            symbol.UserUUID = UserManager.Instance.FindUserUUIDbyUsername(username.text);
             //Debug.Log("UserUUID:" + symbol.UserUUID);
 
             WebServiceManager.Instance.AddSymbol(symbol);
@@ -164,33 +171,20 @@ public class SymbolManager : MonoBehaviour
         addSymbolPanel.SetActive(false);
     }
 
-    private bool ControlNameIsValid(string symbolOwnerDATA, string symbolNameDATA)
+    private bool ControlNameIsValid(string symbolNameDATA)
     {
         bool nameIsValid = true;
-        //List<User> selectedUsers = new List<User>();
-        User dataUser = null;
-        string data = WebServiceManager.Instance.getAllUserData();
-        List<User> allUsers = JsonConvert.DeserializeObject<List<User>>(data);
+       
+        string data = WebServiceManager.Instance.getSymbolsData();
+        List<Symbol> allUserSymbols= JsonConvert.DeserializeObject<List<Symbol>>(data);
 
-        foreach (User user in allUsers)
+        foreach(Symbol symbol in allUserSymbols)
         {
-            if (user.Username.Equals(symbolOwnerDATA))
-            {
-                //TODO dataUser should be list of selected users
-                dataUser = user;
-                break;
-            }
-        }
-        List<string> userSymbolNames = UserManager.Instance.GetUsersSymbolNames(dataUser);
-
-        for (int i = 0; i < userSymbolNames.Count; i++)
-        {
-            if (userSymbolNames[i].ToLower().Trim().Equals(symbolNameDATA.ToLower().Trim()))
+            if (symbol.SymbolName.ToLower().Trim().Equals(symbolNameDATA.ToLower().Trim()))
             {
                 nameIsValid = false;
                 break;
             }
-
         }
 
         return nameIsValid;
