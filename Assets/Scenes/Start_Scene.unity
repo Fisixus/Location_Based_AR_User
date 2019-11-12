@@ -2063,6 +2063,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UsernameAndPasswordPanel: {fileID: 2004017275}
+  LatitudeDATA: {fileID: 0}
+  LongitudeDATA: {fileID: 0}
+  AltitudeDATA: {fileID: 0}
 --- !u!1 &1955953650
 GameObject:
   m_ObjectHideFlags: 0

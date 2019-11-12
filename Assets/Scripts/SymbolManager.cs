@@ -19,24 +19,37 @@ public class SymbolManager : MonoBehaviour
     RawImage changedImage;
     TextMeshProUGUI changedImageCategoryName;
 
-
-    private void Start()
+    private void Initiliaze()
     {
         changedImage = changeSymbolCategoryIcon.GetComponentInChildren<RawImage>();
         changedImageCategoryName = changeSymbolCategoryIcon.GetComponentInChildren<TextMeshProUGUI>();
 
         changedImage.texture = textureList[0];
         changedImageCategoryName.text = Category.Ambulance.ToString();
-
-        username.text = PlayerPrefs.GetString("Username");
-        InvokeRepeating("CallUserSymbols", 3f, 4f);
-        //Invoke("RefreshArcMap", 3f);
-        //Invoke("RefreshContentMap", 3f);
     }
 
-    private void CallUserSymbols()
+    private void Start()
+    {
+        Initiliaze();
+        username.text = PlayerPrefs.GetString("Username");
+        InvokeRepeating("RefreshUserSymbols", 1f, 20f);
+    }
+
+    private void RefreshUserSymbols()
     {
         WebServiceManager.Instance.GetSymbols(UserManager.Instance.FindUserUUIDbyUsername(username.text));
+        Invoke("RefreshContentIcons", 4f);
+        Invoke("RefreshArcMap", 7f);
+    }
+
+    public void RefreshContentIcons()
+    {
+        ContentObjectsManager.Instance.ContentObjectCreator();
+    }
+
+    public void RefreshArcMap()
+    {
+        ArcMapManager.Instance.MiniSymbolCreator();
     }
 
     private void Update()
@@ -104,7 +117,6 @@ public class SymbolManager : MonoBehaviour
         if (postControl)
         {
             Symbol symbol = new Symbol();
-            //TODO For every selected user
             symbol.SymbolName = symbolNameDATA;
             //Debug.Log("SymbolName:" + symbolNameDATA);
             symbol.Latitude = decimal.Parse(latitudeDATA.Replace(',', '.'), CultureInfo.InvariantCulture.NumberFormat);
