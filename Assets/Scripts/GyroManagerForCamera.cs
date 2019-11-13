@@ -1,31 +1,41 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GyroManagerForCamera : MonoBehaviour
 {
+    public static GyroManagerForCamera Instance;
+
     bool gyroEnabled;
     Gyroscope gyro;
     Quaternion rot;
-    GameObject cameraContainer;
     Vector3 gyroscope;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
-
-        cameraContainer = new GameObject("CameraContainer");
-        cameraContainer.transform.position = Vector3.zero;
-
-        cameraContainer.transform.position = transform.position;
-        transform.SetParent(cameraContainer.transform);
-
-        //CameraController.instance.cameraMain = cameraContainer;
-
-
-        //cameraCursor = GameObject.Find("targetCursor").GetComponent<FollowCameraCursor>();
-        //cameraCursor.setCamera(cameraContainer.transform.GetChild(0).GetChild(0).gameObject.transform);
+        Invoke("CameraPlacerByDistance", 3f);
         gyroEnabled = EnableGyro();
+    }
 
+    public void CameraPlacerByDistance()
+    {
+        //This is for editor
+        if (Application.isEditor)
+        {
+            UIManager.Instance.AutoLoadLatLotAltPanel(UserManager.Instance.FindUser(UIManager.Instance.getUsername()));
+        }
+        
+        float latdif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude * 100;
+        float londif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude * 100;
+        float altdif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Altitude * 1;
+        Vector diff = new Vector(londif, altdif, latdif);
+        transform.parent.position = diff.toVector3();
     }
 
     private bool EnableGyro()
@@ -36,13 +46,14 @@ public class GyroManagerForCamera : MonoBehaviour
             gyro.enabled = true;
 
 
-            cameraContainer.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            transform.parent.rotation = Quaternion.Euler(90f, 0f, 0f);
             rot = new Quaternion(-1, 0, 0, 0);
 
             return true;
         }
         return false;
     }
+
     private void Update()
     {
         if (gyroEnabled)

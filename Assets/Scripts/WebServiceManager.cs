@@ -88,8 +88,6 @@ public class WebServiceManager : MonoBehaviour
         Debug.Log(jsonData);
         */
 
-        Invoke("GetAllUsers", .1f);
-
     }
 
     public void GetAllUsers()

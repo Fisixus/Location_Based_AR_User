@@ -25,7 +25,7 @@ public class CursorManager : MonoBehaviour
     private void LateUpdate()
     {
         if (GameObject.Find("/Canvas/AddSymbolPanel")) return;
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(1))
         {
             cursor.SetActive(!cursor.activeSelf);
         }

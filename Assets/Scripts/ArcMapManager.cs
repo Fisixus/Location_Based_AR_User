@@ -8,7 +8,7 @@ public class ArcMapManager : MonoBehaviour
 {
     public static ArcMapManager Instance;
 
-    public GameObject symbolsContainer;
+    public GameObject contentSymbols;
     public GameObject arcCircleMain;
 
     GameObject arcCircleUserOrigin;
@@ -37,7 +37,7 @@ public class ArcMapManager : MonoBehaviour
     public void MiniSymbolCreator()
     {
         DestroyArcMapIcons();
-        foreach (Transform _symbols in symbolsContainer.transform)
+        foreach (Transform _symbols in contentSymbols.transform)
         {
             if (_symbols.gameObject.name != "BaseSymbolObject")
             {
@@ -52,8 +52,8 @@ public class ArcMapManager : MonoBehaviour
 
                 allMiniSymbols.Add(gObj);
 
-                Vector3 target = _symbols.transform.position - Camera.main.transform.position;
-                Vector3 camera = Camera.main.transform.forward;
+                Vector3 target = _symbols.transform.position - Camera.main.transform.parent.position;
+                Vector3 camera = Camera.main.transform.parent.forward;
 
                 angleDiff = Vector3.SignedAngle(camera, target, -Vector3.up);
                 gObj.transform.localEulerAngles = new Vector3(0, 0, angleDiff);
@@ -79,12 +79,12 @@ public class ArcMapManager : MonoBehaviour
     {
         if (isMiniSymbolsCreated)
         {
-            foreach (Transform _symbols in symbolsContainer.transform)
+            foreach (Transform _symbols in contentSymbols.transform)
             {
                 if (_symbols.gameObject.name != "BaseSymbolObject")
                 {
-                    Vector3 target = _symbols.transform.position - Camera.main.transform.position;
-                    Vector3 camera = Camera.main.transform.forward;
+                    Vector3 target = _symbols.transform.position - Camera.main.transform.parent.position;
+                    Vector3 camera = Camera.main.transform.parent.forward;
 
                     angleDiff = Vector3.SignedAngle(camera, target, -Vector3.up);
 

@@ -9,12 +9,13 @@ public class ContentObjectsManager : MonoBehaviour
 {
     public static ContentObjectsManager Instance;
 
+    public GameObject selectedSymbolInfoPanel;
     public GameObject contentObject;
     public List<Texture> symbolIcons;
-    public TextMeshProUGUI username;
 
     GameObject baseSymbolObject;
     GameObject distanceText;
+    GameObject selectedSymbolObject;
     List<Symbol> symbols = new List<Symbol>();
 
     public void Awake()
@@ -50,14 +51,32 @@ public class ContentObjectsManager : MonoBehaviour
             //newContentObject.tag = symbol.Category.ToString();
             newContentObject.name = symbol.SymbolName;
             newContentObject.transform.localEulerAngles = new Vector3(-90, 0, 0);
-            SymbolTextureSetter(symbol, newContentObject);
-            SymbolDistanceTruncater(symbol, newContentObject);
+
+            AdjustPlacementByDistance(symbol, newContentObject);
+            AdjustTexture(symbol, newContentObject);
             AdjustScale(newContentObject);
             AdjustDistance(symbol, newContentObject);
         }
     }
 
-    private void SymbolTextureSetter(Symbol symbol, GameObject newContentObject)
+    private void AdjustPlacementByDistance(Symbol symbol, GameObject newContentObject)
+    {
+        // decrease the numbers to prevent floating precision limit error
+        /*
+        float latdif = ((float)symbol.Latitude - (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude) * 100;
+        float londif = ((float)symbol.Longitude - (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude) * 100;
+        float altdif = ((float)symbol.Altitude - (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Altitude) * 1;
+        */
+        float latdif = (float)symbol.Latitude * 100;
+        float londif = (float)symbol.Longitude * 100;
+        float altdif = (float)symbol.Altitude * 1;
+
+        Vector diff = new Vector(londif, altdif, latdif);
+        newContentObject.transform.position = diff.toVector3();
+        //Debug.Log("Object Name: " + obj.name + "Pos: " + obj.transform.position);
+    }
+
+    private void AdjustTexture(Symbol symbol, GameObject newContentObject)
     {
         switch (symbol.Category)
         {
@@ -116,37 +135,25 @@ public class ContentObjectsManager : MonoBehaviour
         newContentObject.GetComponent<Renderer>().material.mainTexture = symbolIcons[textureNo];
     }
 
-    private void SymbolDistanceTruncater(Symbol symbol, GameObject newContentObject)
-    {
-        // decrease the numbers to prevent floating precision limit error
-
-        float latdif = ((float)symbol.Latitude - (float)UserManager.Instance.FindUser(username.text).Latitude) * 100;
-        float londif = ((float)symbol.Longitude - (float)UserManager.Instance.FindUser(username.text).Longitude) * 100;
-        float altdif = ((float)symbol.Altitude - (float)UserManager.Instance.FindUser(username.text).Altitude) * 1;
-        Vector diff = new Vector(londif, altdif, latdif);
-        newContentObject.transform.position = diff.toVector3();
-        //Debug.Log("Object Name: " + obj.name + "Pos: " + obj.transform.position);
-    }
-
     private void AdjustScale(GameObject newContentObject)
     {
-        float symbolDistance = Vector3.Distance(Camera.main.transform.position, newContentObject.transform.position);
+        float symbolDistance = Vector3.Distance(Camera.main.transform.parent.position, newContentObject.transform.position);
         int symbolScaleDistanceRatio = 9;
 
         if (symbolDistance >= 0 && symbolDistance <= 100)
-            symbolScaleDistanceRatio = 30;
+            symbolScaleDistanceRatio = 18;
         else if (symbolDistance > 100 && symbolDistance <= 150)
-            symbolScaleDistanceRatio = 33;
+            symbolScaleDistanceRatio = 21;
         else if (symbolDistance > 150 && symbolDistance <= 200)
-            symbolScaleDistanceRatio = 36;
+            symbolScaleDistanceRatio = 24;
         else if (symbolDistance > 200 && symbolDistance <= 300)
-            symbolScaleDistanceRatio = 39;
+            symbolScaleDistanceRatio = 27;
         else if (symbolDistance > 300 && symbolDistance <= 400)
-            symbolScaleDistanceRatio = 42;
+            symbolScaleDistanceRatio = 30;
         else if (symbolDistance > 400 && symbolDistance <= 500)
-            symbolScaleDistanceRatio = 45;
+            symbolScaleDistanceRatio = 33;
         else if (symbolDistance > 500)
-            symbolScaleDistanceRatio = 48;
+            symbolScaleDistanceRatio = 36;
 
         float properScaleValue = symbolDistance / symbolScaleDistanceRatio;
 
@@ -155,9 +162,8 @@ public class ContentObjectsManager : MonoBehaviour
 
     private void AdjustDistance(Symbol symbol, GameObject newContentObject)
     {
-        //AttachDistanceInfo
         float distanceToSymbol =
-                CoordinateManager.Instance.GetDistanceFromLatLonInMeter((float)UserManager.Instance.FindUser(username.text).Latitude, (float)UserManager.Instance.FindUser(username.text).Longitude, (float)symbol.Latitude, (float)symbol.Longitude);
+                CoordinateManager.Instance.GetDistanceFromLatLonInMeter((float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude, (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude, (float)symbol.Latitude, (float)symbol.Longitude);
 
         if (newContentObject.transform.GetChild(0) != null)
         {
@@ -186,4 +192,56 @@ public class ContentObjectsManager : MonoBehaviour
             }
         }
     }
+
+    private void Update()
+    {
+        //If specific symbol is touched
+        //if (Input.touchCount > 0)
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetMouseButton(0))
+#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+#endif
+        {
+            if (!UIManager.Instance.FocusOnSymbolInfoPanel())
+            {
+                if (selectedSymbolObject != null)
+                {
+                    selectedSymbolObject.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false;
+                    selectedSymbolInfoPanel.SetActive(false);
+                }
+            }
+
+            //Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hitPoint;
+
+            if (Physics.Raycast(ray, out hitPoint))
+            {
+                selectedSymbolObject = hitPoint.transform.gameObject;
+                Debug.Log(selectedSymbolObject.name);
+                Symbol symbol = null;
+                if (selectedSymbolObject != null)
+                {                    
+                    symbol = SymbolManager.Instance.FindSymbolByName(selectedSymbolObject.name);
+                }
+                if(symbol != null)
+                {
+                    selectedSymbolObject.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = true;
+                    selectedSymbolInfoPanel.SetActive(true);
+                    UIManager.Instance.AutoLoadSymbolInfoPanel(symbol);
+                }
+            }
+
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetMouseButtonUp(0))
+#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        if (Input.touches[0].phase == TouchPhase.Ended)
+#endif
+        {
+            UIManager.Instance.ClearUIResults();
+        }
+    }    
 }

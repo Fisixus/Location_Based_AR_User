@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RotationSettings : MonoBehaviour
+public class RotationSettingForContentObjects : MonoBehaviour
 {
     void Update()
     {

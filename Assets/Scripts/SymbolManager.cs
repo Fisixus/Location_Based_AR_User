@@ -10,14 +10,20 @@ using UnityEngine.UI;
 
 public class SymbolManager : MonoBehaviour
 {
+    public static SymbolManager Instance;
+
     public List<Texture> textureList;
     public GameObject changeSymbolCategoryIcon;
     public GameObject addSymbolPanel;
-    public TextMeshProUGUI username;
 
     int textureIndex = 0;
     RawImage changedImage;
     TextMeshProUGUI changedImageCategoryName;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Initiliaze()
     {
@@ -30,14 +36,13 @@ public class SymbolManager : MonoBehaviour
 
     private void Start()
     {
-        Initiliaze();
-        username.text = PlayerPrefs.GetString("Username");
+        Initiliaze();        
         InvokeRepeating("RefreshUserSymbols", 1f, 20f);
     }
 
     private void RefreshUserSymbols()
     {
-        WebServiceManager.Instance.GetSymbols(UserManager.Instance.FindUserUUIDbyUsername(username.text));
+        WebServiceManager.Instance.GetSymbols(UserManager.Instance.FindUserUUIDbyUsername(UIManager.Instance.getUsername()));
         Invoke("RefreshContentIcons", 4f);
         Invoke("RefreshArcMap", 7f);
     }
@@ -57,7 +62,7 @@ public class SymbolManager : MonoBehaviour
         if (addSymbolPanel.activeSelf) return;
 
         ///For opening and closing changeImage
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(1))
         {
             changeSymbolCategoryIcon.SetActive(!changeSymbolCategoryIcon.activeSelf);
         }
@@ -70,22 +75,16 @@ public class SymbolManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Joystick1Button0) || Input.GetKeyDown(KeyCode.Space))
             {
                 addSymbolPanel.SetActive(true);
-                AutoLoadtoAddPanel();
+                UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name);
                 ///There is an add button event for the final process
             }
         }
     }
 
-    private void AutoLoadtoAddPanel()
-    {
-        addSymbolPanel.transform.Find("ScrollView/ContentPanel/CategoryDATA").GetComponent<InputField>().text = textureList[textureIndex].name;
+    
 
-        //TODO there need to some math functions for that.
-        addSymbolPanel.transform.Find("ScrollView/ContentPanel/LatitudeDATA").GetComponent<InputField>().text = "43.345454545";
-        addSymbolPanel.transform.Find("ScrollView/ContentPanel/LongitudeDATA").GetComponent<InputField>().text = "31.43434";
-        addSymbolPanel.transform.Find("ScrollView/ContentPanel/AltitudeDATA").GetComponent<InputField>().text = "0.0";
-    }
 
+    /// When the clicked to add button event
     public void AddSymbol()
     {
         Category category;
@@ -98,10 +97,10 @@ public class SymbolManager : MonoBehaviour
         string altitudeDATA = addSymbolPanel.transform.Find("ScrollView/ContentPanel/AltitudeDATA").GetComponent<InputField>().text.Trim();
         string messageDATA = addSymbolPanel.transform.Find("ScrollView/ContentPanel/MessageDATA").GetComponentInChildren<InputField>().text.Trim();
 
-        //categorydata is non-editable in the panel
+        ///categorydata is non-editable in the panel
         string categoryDATA = textureList[textureIndex].name;
 
-        ///control for unique symbol names for the each user
+        ///control for unique symbol names for the online user
         bool nameIsValid = ControlNameIsValid(symbolNameDATA);
 
 
@@ -129,7 +128,7 @@ public class SymbolManager : MonoBehaviour
             symbol.Message = messageDATA;
             //Debug.Log("MessageData:" + messageDATA);
             //Debug.Log("SymbolOwner:" + symbolOwnerDATA);
-            symbol.UserUUID = UserManager.Instance.FindUserUUIDbyUsername(username.text);
+            symbol.UserUUID = UserManager.Instance.FindUserUUIDbyUsername(UIManager.Instance.getUsername());
             //Debug.Log("UserUUID:" + symbol.UserUUID);
 
             WebServiceManager.Instance.AddSymbol(symbol);
@@ -200,5 +199,20 @@ public class SymbolManager : MonoBehaviour
         }
 
         return nameIsValid;
+    }
+
+    public Symbol FindSymbolByName(string name)
+    {
+        Symbol symbol = null;
+        string data = WebServiceManager.Instance.getSymbolsData();
+        List<Symbol> userSymbols = JsonConvert.DeserializeObject<List<Symbol>>(data);
+        for (int i = 0; i < userSymbols.Count; i++)
+        {
+            if (userSymbols[i].SymbolName.ToLower().Equals(name.ToLower()))
+            {
+                symbol = userSymbols[i];
+            }
+        }
+        return symbol;
     }
 }

@@ -11,9 +11,6 @@ public class UserManager : MonoBehaviour
     public static UserManager Instance;
 
     public GameObject UsernameAndPasswordPanel;
-    public TextMeshProUGUI LatitudeDATA;
-    public TextMeshProUGUI LongitudeDATA;
-    public TextMeshProUGUI AltitudeDATA;
 
     string usernameDATA = " ";
     string passwordDATA = " ";
@@ -26,6 +23,16 @@ public class UserManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+    }
+
+    private void Start()
+    {
+        Invoke("CallUserSymbols", .1f);
+    }
+
+    private void CallUserSymbols()
+    {
+        WebServiceManager.Instance.GetAllUsers();
     }
 
     //Finds user uuid by username
@@ -92,7 +99,7 @@ public class UserManager : MonoBehaviour
         return userSymbolNames;
     }
 
-    //TODO This will be temporary, because need to cognito settings on service
+    //TODO This will be temporary, because there need to cognito settings on service
     public void LoginControl()
     {
         /*
@@ -126,7 +133,7 @@ public class UserManager : MonoBehaviour
             PlayerPrefs.DeleteAll();
             PlayerPrefs.SetString("Username", usernameDATA);
             StartCoroutine(ControlLocationService());
-            SceneManager.LoadScene(1);            
+            SceneManager.LoadScene(1);
         }
         else
         {
@@ -140,7 +147,7 @@ public class UserManager : MonoBehaviour
     {
         //Check whether is in editor
         if (Application.isEditor)
-        {
+        {            
             isLocationServiceActive = false;
             locationStatus = "Editor Mode.";
             yield break;
@@ -185,7 +192,7 @@ public class UserManager : MonoBehaviour
         }
         else
         {
-            InvokeRepeating("LocationUpdater", 0, 10);
+            InvokeRepeating("LocationUpdater", 3, 10);
         }
     }
 
@@ -197,7 +204,8 @@ public class UserManager : MonoBehaviour
         onlineUser.Latitude = (decimal)Input.location.lastData.latitude;
         onlineUser.Longitude = (decimal)Input.location.lastData.longitude;
         onlineUser.Altitude = (decimal)Input.location.lastData.altitude;
-        AutoLoadLatLotAltPanel();
+        UIManager.Instance.AutoLoadLatLotAltPanel(onlineUser);
+        GyroManagerForCamera.Instance.CameraPlacerByDistance();
         WebServiceManager.Instance.UpdateUser(onlineUser);
 
 
@@ -210,12 +218,5 @@ public class UserManager : MonoBehaviour
         PlayerPrefs.DeleteAll();
         SceneManager.LoadScene(0);
     }
-
-    public void AutoLoadLatLotAltPanel()
-    {
-        LatitudeDATA.text = onlineUser.Latitude.ToString();
-        LongitudeDATA.text = onlineUser.Longitude.ToString();
-        AltitudeDATA.text = onlineUser.Altitude.ToString();
-    }
-
+   
 }
