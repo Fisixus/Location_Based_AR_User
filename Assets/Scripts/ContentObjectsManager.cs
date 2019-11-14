@@ -4,11 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class ContentObjectsManager : MonoBehaviour
 {
     public static ContentObjectsManager Instance;
 
+    public GameObject deleteContentObjectConfirmation;
     public GameObject selectedSymbolInfoPanel;
     public GameObject contentObject;
     public List<Texture> symbolIcons;
@@ -17,6 +19,7 @@ public class ContentObjectsManager : MonoBehaviour
     GameObject distanceText;
     GameObject selectedSymbolObject;
     List<Symbol> symbols = new List<Symbol>();
+    string selectedSymbolName;
 
     public void Awake()
     {
@@ -51,11 +54,17 @@ public class ContentObjectsManager : MonoBehaviour
             //newContentObject.tag = symbol.Category.ToString();
             newContentObject.name = symbol.SymbolName;
             newContentObject.transform.localEulerAngles = new Vector3(-90, 0, 0);
-
             AdjustPlacementByDistance(symbol, newContentObject);
             AdjustTexture(symbol, newContentObject);
             AdjustScale(newContentObject);
             AdjustDistance(symbol, newContentObject);
+
+            ///When the selectedSymbolObject refreshed, dont lose the focus on info panel and border
+            if (newContentObject.name.Equals(selectedSymbolName))
+            {
+                selectedSymbolObject = newContentObject;
+                selectedSymbolObject.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = true;
+            }
         }
     }
 
@@ -193,32 +202,66 @@ public class ContentObjectsManager : MonoBehaviour
         }
     }
 
+
+    /// Clicked event for the cross button on content object
+    public void DeleteContentObject()
+    {
+        selectedSymbolName = string.Empty;
+        GameObject gObj = EventSystem.current.currentSelectedGameObject;
+        selectedSymbolName = gObj.GetComponentInParent<Collider>().gameObject.name;
+        string username = UIManager.Instance.getUsername();
+
+        deleteContentObjectConfirmation.SetActive(true);
+    }
+
+    public void DeleteContentObjectConfirm()
+    {
+        string username = UIManager.Instance.getUsername();
+        WebServiceManager.Instance.DeleteSymbol(SymbolManager.Instance.FindSymbolByName(selectedSymbolName).getUUID, UserManager.Instance.FindUserUUIDbyUsername(username));
+        CloseSymbolConfirmationWindow();
+    }
+
+    public void DeleteContentObjectCancel()
+    {
+        CloseSymbolConfirmationWindow();
+    }
+
+    public void CloseSymbolConfirmationWindow()
+    {
+        deleteContentObjectConfirmation.SetActive(false);
+    }
+
     private void Update()
     {
-        //If specific symbol is touched
-        //if (Input.touchCount > 0)
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN
         if (Input.GetMouseButton(0))
 #elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
 #endif
         {
+            ///When click anything except symbolinfoPanel dismiss the focus on symbolinfoPanel
             if (!UIManager.Instance.FocusOnSymbolInfoPanel())
             {
                 if (selectedSymbolObject != null)
                 {
                     selectedSymbolObject.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false;
                     selectedSymbolInfoPanel.SetActive(false);
+                    selectedSymbolObject = null;
+                    selectedSymbolName = string.Empty;
                 }
             }
+            Ray ray;
+            if(Application.isEditor)
+                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            else
+                ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
 
-            //Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hitPoint;
 
             if (Physics.Raycast(ray, out hitPoint))
             {
                 selectedSymbolObject = hitPoint.transform.gameObject;
+                selectedSymbolName = selectedSymbolObject.name;
                 Debug.Log(selectedSymbolObject.name);
                 Symbol symbol = null;
                 if (selectedSymbolObject != null)

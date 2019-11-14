@@ -25,9 +25,31 @@ public class CursorManager : MonoBehaviour
     private void LateUpdate()
     {
         if (GameObject.Find("/Canvas/AddSymbolPanel")) return;
-        if (Input.GetMouseButtonDown(1))
+
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetMouseButtonDown(0))
+#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+#endif
         {
-            cursor.SetActive(!cursor.activeSelf);
+            if (!UIManager.Instance.FocusOnSymbolInfoPanel())
+            {
+                cursor.SetActive(!cursor.activeSelf);
+            }
+            ///If click focus on symbolInfoPanel then close the cursor
+            else
+            {
+                cursor.SetActive(false);
+            }
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetMouseButtonUp(0))
+#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        if (Input.touches[0].phase == TouchPhase.Ended)
+#endif
+        {
+            UIManager.Instance.ClearUIResults();
         }
 
         if (cursor.activeSelf)

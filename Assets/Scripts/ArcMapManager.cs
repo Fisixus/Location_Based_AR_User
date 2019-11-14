@@ -41,26 +41,30 @@ public class ArcMapManager : MonoBehaviour
         {
             if (_symbols.gameObject.name != "BaseSymbolObject")
             {
-                GameObject gObj = Instantiate(miniSymbolTemplate, arcCircleMain.transform) as GameObject;
-                gObj.name = "mini_" + _symbols.name;
-                Image _img = gObj.transform.GetChild(0).transform.GetComponent<Image>();
+                GameObject miniObj = Instantiate(miniSymbolTemplate, arcCircleMain.transform) as GameObject;
+                miniObj.name = "mini_" + _symbols.name;
+                Image _img = miniObj.transform.GetChild(0).transform.GetComponent<Image>();
 
                 Texture2D _tex = _symbols.GetComponent<Renderer>().material.mainTexture as Texture2D;
                 Sprite _sprite = Sprite.Create(_tex, new Rect(0, 0, _tex.width, _tex.height), _img.transform.position);
-                Debug.Log("Sprite Name: " + _tex.name);
                 _img.sprite = _sprite;
+                //Debug.Log("Sprite Name: " + _tex.name);
 
-                allMiniSymbols.Add(gObj);
-
-                Vector3 target = _symbols.transform.position - Camera.main.transform.parent.position;
-                Vector3 camera = Camera.main.transform.parent.forward;
-
-                angleDiff = Vector3.SignedAngle(camera, target, -Vector3.up);
-                gObj.transform.localEulerAngles = new Vector3(0, 0, angleDiff);
+                allMiniSymbols.Add(miniObj);
+                AdjustAngleOfMiniSymbols(_symbols, miniObj);
             }
         }
 
         isMiniSymbolsCreated = true;
+    }
+
+    private void AdjustAngleOfMiniSymbols(Transform _symbols, GameObject miniObj)
+    {
+        Vector3 target = _symbols.transform.position - Camera.main.transform.parent.position;
+        Vector3 camera = Camera.main.transform.parent.forward;
+
+        angleDiff = Vector3.SignedAngle(camera, target, -Vector3.up);
+        miniObj.transform.localEulerAngles = new Vector3(0, 0, angleDiff);
     }
 
 
@@ -74,7 +78,7 @@ public class ArcMapManager : MonoBehaviour
         isMiniSymbolsCreated = false;
     }
 
-    //When user rotates then arcmap icons rotates with him
+    ///When user rotates then arcmap icons rotates with him
     void Update()
     {
         if (isMiniSymbolsCreated)
@@ -83,14 +87,9 @@ public class ArcMapManager : MonoBehaviour
             {
                 if (_symbols.gameObject.name != "BaseSymbolObject")
                 {
-                    Vector3 target = _symbols.transform.position - Camera.main.transform.parent.position;
-                    Vector3 camera = Camera.main.transform.parent.forward;
-
-                    angleDiff = Vector3.SignedAngle(camera, target, -Vector3.up);
-
                     GameObject miniObj = allMiniSymbols.Find(x => x.name.Contains(_symbols.gameObject.name));
-                    miniObj.transform.localEulerAngles = new Vector3(0, 0, angleDiff);
 
+                    AdjustAngleOfMiniSymbols(_symbols, miniObj);
                 }
             }
 

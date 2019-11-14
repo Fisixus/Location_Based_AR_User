@@ -192,7 +192,7 @@ public class UserManager : MonoBehaviour
         }
         else
         {
-            InvokeRepeating("LocationUpdater", 3, 10);
+            InvokeRepeating("LocationUpdater", 3, 3);
         }
     }
 

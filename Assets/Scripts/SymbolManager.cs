@@ -44,7 +44,7 @@ public class SymbolManager : MonoBehaviour
     {
         WebServiceManager.Instance.GetSymbols(UserManager.Instance.FindUserUUIDbyUsername(UIManager.Instance.getUsername()));
         Invoke("RefreshContentIcons", 4f);
-        Invoke("RefreshArcMap", 7f);
+        Invoke("RefreshArcMap", 6f);
     }
 
     public void RefreshContentIcons()
@@ -62,9 +62,30 @@ public class SymbolManager : MonoBehaviour
         if (addSymbolPanel.activeSelf) return;
 
         ///For opening and closing changeImage
-        if (Input.GetMouseButtonDown(1))
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetMouseButtonDown(0))
+#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+#endif
         {
-            changeSymbolCategoryIcon.SetActive(!changeSymbolCategoryIcon.activeSelf);
+            if (!UIManager.Instance.FocusOnSymbolInfoPanel())
+            {
+                changeSymbolCategoryIcon.SetActive(!changeSymbolCategoryIcon.activeSelf);
+            }
+            ///If click focus on symbolInfoPanel then close the changeSymbolCategoryIcon
+            else
+            {
+                changeSymbolCategoryIcon.SetActive(false);
+            }
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetMouseButtonUp(0))
+#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        if (Input.touches[0].phase == TouchPhase.Ended)
+#endif
+        {
+            UIManager.Instance.ClearUIResults();
         }
 
         if (changeSymbolCategoryIcon.activeSelf)
@@ -76,7 +97,6 @@ public class SymbolManager : MonoBehaviour
             {
                 addSymbolPanel.SetActive(true);
                 UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name);
-                ///There is an add button event for the final process
             }
         }
     }
@@ -84,7 +104,7 @@ public class SymbolManager : MonoBehaviour
     
 
 
-    /// When the clicked to add button event
+    /// When the clicked to add button event, in another name AddContentObject
     public void AddSymbol()
     {
         Category category;
