@@ -12,7 +12,7 @@ public class ContentObjectsManager : MonoBehaviour
 
     public GameObject deleteContentObjectConfirmation;
     public GameObject selectedSymbolInfoPanel;
-    public GameObject contentObject;
+    public GameObject contentObjects;
     public List<Texture> symbolIcons;
 
     GameObject baseSymbolObject;
@@ -21,6 +21,8 @@ public class ContentObjectsManager : MonoBehaviour
     List<Symbol> symbols = new List<Symbol>();
     string selectedSymbolName;
 
+    public bool isContentObjectCreated = false;
+
     public void Awake()
     {
         Instance = this;
@@ -28,8 +30,8 @@ public class ContentObjectsManager : MonoBehaviour
 
     private void Initiliaze()
     {
-        baseSymbolObject = contentObject.GetComponentInChildren<Collider>().gameObject;
-        distanceText = contentObject.GetComponentInChildren<TextMeshProUGUI>().gameObject;
+        baseSymbolObject = contentObjects.GetComponentInChildren<Collider>().gameObject;
+        distanceText = contentObjects.GetComponentInChildren<TextMeshProUGUI>().gameObject;
     }
 
     private void Start()
@@ -50,11 +52,11 @@ public class ContentObjectsManager : MonoBehaviour
             //cubeNew.GetComponent<Renderer>().enabled = true;
             //cubeNew.transform.GetChild(0).GetComponent<Renderer>().enabled = true;
             newContentObject.SetActive(true);
-            newContentObject.transform.parent = contentObject.transform;
+            newContentObject.transform.parent = contentObjects.transform;
             //newContentObject.tag = symbol.Category.ToString();
             newContentObject.name = symbol.SymbolName;
             newContentObject.transform.localEulerAngles = new Vector3(-90, 0, 0);
-            AdjustPlacementByDistance(symbol, newContentObject);
+            AdjustGameObjectPlacement(symbol, newContentObject);
             AdjustTexture(symbol, newContentObject);
             AdjustScale(newContentObject);
             AdjustDistance(symbol, newContentObject);
@@ -66,9 +68,10 @@ public class ContentObjectsManager : MonoBehaviour
                 selectedSymbolObject.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = true;
             }
         }
+        isContentObjectCreated = true;
     }
 
-    private void AdjustPlacementByDistance(Symbol symbol, GameObject newContentObject)
+    private void AdjustGameObjectPlacement(Symbol symbol, GameObject newContentObject)
     {
         // decrease the numbers to prevent floating precision limit error
         /*
@@ -138,7 +141,7 @@ public class ContentObjectsManager : MonoBehaviour
                 break;
         }
     }
-
+    
     private void SetImage(GameObject newContentObject, int textureNo)
     {
         newContentObject.GetComponent<Renderer>().material.mainTexture = symbolIcons[textureNo];
@@ -173,6 +176,7 @@ public class ContentObjectsManager : MonoBehaviour
     {
         float distanceToSymbol =
                 CoordinateManager.Instance.GetDistanceFromLatLonInMeter((float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude, (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude, (float)symbol.Latitude, (float)symbol.Longitude);
+        Debug.Log("Distance:" + distanceToSymbol);
 
         if (newContentObject.transform.GetChild(0) != null)
         {
@@ -191,15 +195,16 @@ public class ContentObjectsManager : MonoBehaviour
     
 
     public void DestroyContentObjects()
-    {
+    {        
         symbols.Clear();
-        foreach (Transform _symbols in contentObject.transform)
+        foreach (Transform _symbols in contentObjects.transform)
         {
             if (_symbols.gameObject.name != "BaseSymbolObject")
             {
                 Destroy(_symbols.gameObject);
             }
         }
+        isContentObjectCreated = false;
     }
 
 
@@ -219,7 +224,16 @@ public class ContentObjectsManager : MonoBehaviour
         string username = UIManager.Instance.getUsername();
         WebServiceManager.Instance.DeleteSymbol(SymbolManager.Instance.FindSymbolByName(selectedSymbolName).getUUID, UserManager.Instance.FindUserUUIDbyUsername(username));
         CloseSymbolConfirmationWindow();
+
+        
+        Invoke("CallRefreshUserSymbols", 3f);
     }
+
+    private void CallRefreshUserSymbols()
+    {
+        SymbolManager.Instance.RefreshUserSymbols();
+    }
+
 
     public void DeleteContentObjectCancel()
     {
@@ -230,9 +244,38 @@ public class ContentObjectsManager : MonoBehaviour
     {
         deleteContentObjectConfirmation.SetActive(false);
     }
-
+    /// Place and distance should change dynamically, there is no need to destroy and create every time for this
+    /// However  POST and GET required, and that reason dont work dynamically
+    /*
+    public void DynamicallyAdjustPlaceAndDistance()
+    {
+        foreach (Transform _symbols in contentObjects.transform)
+        {
+            if (_symbols.gameObject.name != "BaseSymbolObject")
+            {
+                Symbol symbol = SymbolManager.Instance.FindSymbolByName(_symbols.gameObject.name);
+                if(symbol != null)
+                {
+                    AdjustGameObjectPlacement(symbol, _symbols.gameObject);
+                    AdjustScale(_symbols.gameObject);
+                    AdjustDistance(symbol, _symbols.gameObject);
+                }
+            }
+        }
+    }
+    
+    
+    private void LateUpdate()
+    {
+        if (isContentObjectCreated)
+        {
+            DynamicallyAdjustPlaceAndDistance();
+        }
+    }
+    */
     private void Update()
     {
+
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN
         if (Input.GetMouseButton(0))
 #elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR

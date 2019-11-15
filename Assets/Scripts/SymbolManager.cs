@@ -36,23 +36,28 @@ public class SymbolManager : MonoBehaviour
 
     private void Start()
     {
-        Initiliaze();        
-        InvokeRepeating("RefreshUserSymbols", 1f, 20f);
+        Initiliaze();      
+        ///It is repeating because admin assign or delete symbol from user too
+        InvokeRepeating("RefreshUserSymbols", 1f, 5f);
     }
 
-    private void RefreshUserSymbols()
+    public void RefreshUserSymbols()
     {
+        ContentObjectsManager.Instance.isContentObjectCreated = false;
+        //ArcMapManager.Instance.isMiniSymbolsCreated = false;
+        CancelInvoke("RefreshContentIcons");
+        CancelInvoke("RefreshArcMap");
         WebServiceManager.Instance.GetSymbols(UserManager.Instance.FindUserUUIDbyUsername(UIManager.Instance.getUsername()));
-        Invoke("RefreshContentIcons", 4f);
-        Invoke("RefreshArcMap", 6f);
+        Invoke("RefreshContentIcons", 3.5f);
+        Invoke("RefreshArcMap", 4.5f);
     }
 
-    public void RefreshContentIcons()
+    private void RefreshContentIcons()
     {
         ContentObjectsManager.Instance.ContentObjectCreator();
     }
 
-    public void RefreshArcMap()
+    private void RefreshArcMap()
     {
         ArcMapManager.Instance.MiniSymbolCreator();
     }
@@ -152,8 +157,7 @@ public class SymbolManager : MonoBehaviour
             //Debug.Log("UserUUID:" + symbol.UserUUID);
 
             WebServiceManager.Instance.AddSymbol(symbol);
-            //TODO NEED ARCMAP REFRESH
-            //TODO NEED CONTENT REFRESH
+            //Invoke("RefreshUserSymbols", 3f);
         }
 
         else

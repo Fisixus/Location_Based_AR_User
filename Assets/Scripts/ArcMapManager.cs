@@ -8,7 +8,7 @@ public class ArcMapManager : MonoBehaviour
 {
     public static ArcMapManager Instance;
 
-    public GameObject contentSymbols;
+    public GameObject contentObjects;
     public GameObject arcCircleMain;
 
     GameObject arcCircleUserOrigin;
@@ -16,7 +16,7 @@ public class ArcMapManager : MonoBehaviour
 
     List<GameObject> allMiniSymbols = new List<GameObject>();
     float angleDiff;
-    bool isMiniSymbolsCreated = false;
+    public bool isMiniSymbolsCreated = false;
 
     private void Awake()
     {
@@ -37,7 +37,7 @@ public class ArcMapManager : MonoBehaviour
     public void MiniSymbolCreator()
     {
         DestroyArcMapIcons();
-        foreach (Transform _symbols in contentSymbols.transform)
+        foreach (Transform _symbols in contentObjects.transform)
         {
             if (_symbols.gameObject.name != "BaseSymbolObject")
             {
@@ -83,13 +83,15 @@ public class ArcMapManager : MonoBehaviour
     {
         if (isMiniSymbolsCreated)
         {
-            foreach (Transform _symbols in contentSymbols.transform)
+            foreach (Transform _symbols in contentObjects.transform)
             {
                 if (_symbols.gameObject.name != "BaseSymbolObject")
                 {
                     GameObject miniObj = allMiniSymbols.Find(x => x.name.Contains(_symbols.gameObject.name));
-
-                    AdjustAngleOfMiniSymbols(_symbols, miniObj);
+                    if(miniObj != null)
+                    {
+                        AdjustAngleOfMiniSymbols(_symbols, miniObj);
+                    }
                 }
             }
 

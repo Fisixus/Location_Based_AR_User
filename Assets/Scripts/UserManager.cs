@@ -121,11 +121,13 @@ public class UserManager : MonoBehaviour
         List<User> allUsers = JsonConvert.DeserializeObject<List<User>>(data);
         foreach (User user in allUsers)
         {
-            if ((user.Username.ToLower().Equals(usernameDATA.ToLower())) && (user.Password.Equals(passwordDATA)))
+            if(user.Role != Role.Deleted)
             {
-                //TODO dataUser should be list of selected users
-                onlineUser = user;
-                break;
+                if ((user.Username.ToLower().Equals(usernameDATA.ToLower())) && (user.Password.Equals(passwordDATA)))
+                {
+                    onlineUser = user;
+                    break;
+                }
             }
         }
         if(onlineUser != null)
@@ -187,7 +189,6 @@ public class UserManager : MonoBehaviour
             isLocationServiceActive = false;
             locationStatus = "Location Service Failed!";
             CancelInvoke("LocationUpdater");
-
             yield break;
         }
         else
@@ -200,14 +201,15 @@ public class UserManager : MonoBehaviour
     {
         //isLocationServiceActive = true;
         //locationStatus = "Location Service Active..";
-        
-        onlineUser.Latitude = (decimal)Input.location.lastData.latitude;
-        onlineUser.Longitude = (decimal)Input.location.lastData.longitude;
-        onlineUser.Altitude = (decimal)Input.location.lastData.altitude;
-        UIManager.Instance.AutoLoadLatLotAltPanel(onlineUser);
-        GyroManagerForCamera.Instance.CameraPlacerByDistance();
-        WebServiceManager.Instance.UpdateUser(onlineUser);
-
+        if(onlineUser != null)
+        {
+            onlineUser.Latitude = (decimal)Input.location.lastData.latitude;
+            onlineUser.Longitude = (decimal)Input.location.lastData.longitude;
+            onlineUser.Altitude = (decimal)Input.location.lastData.altitude;
+            UIManager.Instance.AutoLoadLatLotAltPanel(onlineUser);
+            GyroManagerForCamera.Instance.CameraPlacerByDistance();
+            WebServiceManager.Instance.UpdateUser(onlineUser);
+        }
 
         //user.horizontalAcc = Input.location.lastData.horizontalAccuracy;
         //user.timeStamp = Input.location.lastData.timestamp;
