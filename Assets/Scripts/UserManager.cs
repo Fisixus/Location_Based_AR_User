@@ -193,13 +193,13 @@ public class UserManager : MonoBehaviour
         }
         else
         {
+            isLocationServiceActive = true;
             InvokeRepeating("LocationUpdater", 3, 3);
         }
     }
 
     public void LocationUpdater()
     {
-        //isLocationServiceActive = true;
         //locationStatus = "Location Service Active..";
         if(onlineUser != null)
         {
@@ -220,5 +220,17 @@ public class UserManager : MonoBehaviour
         PlayerPrefs.DeleteAll();
         SceneManager.LoadScene(0);
     }
-   
+
+    private void LateUpdate()
+    {
+        if(onlineUser != null && isLocationServiceActive)
+        {
+            onlineUser.Latitude = (decimal)Input.location.lastData.latitude;
+            onlineUser.Longitude = (decimal)Input.location.lastData.longitude;
+            onlineUser.Altitude = (decimal)Input.location.lastData.altitude;
+            UIManager.Instance.AutoLoadLatLotAltPanel(onlineUser);
+            GyroManagerForCamera.Instance.CameraPlacerByDistance();
+        }
+    }
+
 }

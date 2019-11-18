@@ -75,14 +75,14 @@ public class UIManager : MonoBehaviour
         GameObject.Find("/Canvas/SymbolInfo/ScrollView/ContentPanel/MessageDATA").GetComponent<TextMeshProUGUI>().text = symbol.Message;
     }
 
-    public void AutoLoadtoAddPanel(string textureName)
+    public void AutoLoadtoAddPanel(string textureName, LatLonH latlon)
     {
         addSymbolPanel.transform.Find("ScrollView/ContentPanel/CategoryDATA").GetComponent<InputField>().text = textureName;
 
         //TODO there need to some math functions for that.
-        addSymbolPanel.transform.Find("ScrollView/ContentPanel/LatitudeDATA").GetComponent<InputField>().text = "43.345454545";
-        addSymbolPanel.transform.Find("ScrollView/ContentPanel/LongitudeDATA").GetComponent<InputField>().text = "31.43434";
-        addSymbolPanel.transform.Find("ScrollView/ContentPanel/AltitudeDATA").GetComponent<InputField>().text = "0.0";
+        addSymbolPanel.transform.Find("ScrollView/ContentPanel/LatitudeDATA").GetComponent<InputField>().text = latlon.getLatitude().ToString();
+        addSymbolPanel.transform.Find("ScrollView/ContentPanel/LongitudeDATA").GetComponent<InputField>().text = latlon.getLongitude().ToString();
+        addSymbolPanel.transform.Find("ScrollView/ContentPanel/AltitudeDATA").GetComponent<InputField>().text = latlon.getAltitude().ToString();
     }
 
 

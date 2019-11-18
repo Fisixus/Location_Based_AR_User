@@ -30,12 +30,17 @@ public class GyroManagerForCamera : MonoBehaviour
         {
             UIManager.Instance.AutoLoadLatLotAltPanel(UserManager.Instance.FindUser(UIManager.Instance.getUsername()));
         }
-        
+        User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
+        LatLonH latlon = new LatLonH((float)user.Longitude, (float)user.Latitude, (float)user.Altitude);
+        Vector diff = CoordinateManager.Instance.ToWorldCoord(latlon);
+        transform.parent.position = diff.toVector3();
+        /*
         float latdif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude * 100;
         float londif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude * 100;
         float altdif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Altitude * 1;
         Vector diff = new Vector(londif, altdif, latdif);
         transform.parent.position = diff.toVector3();
+        */
     }
 
     private bool EnableGyro()

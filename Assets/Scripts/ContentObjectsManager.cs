@@ -55,8 +55,9 @@ public class ContentObjectsManager : MonoBehaviour
             newContentObject.transform.parent = contentObjects.transform;
             //newContentObject.tag = symbol.Category.ToString();
             newContentObject.name = symbol.SymbolName;
-            newContentObject.transform.localEulerAngles = new Vector3(-90, 0, 0);
-            AdjustGameObjectPlacement(symbol, newContentObject);
+            //newContentObject.transform.localEulerAngles = new Vector3(-90, 0, 0);
+            AdjustGameObjectLocation(symbol, newContentObject);
+            AdjustGameObjectRotation(newContentObject);
             AdjustTexture(symbol, newContentObject);
             AdjustScale(newContentObject);
             AdjustDistance(symbol, newContentObject);
@@ -71,21 +72,29 @@ public class ContentObjectsManager : MonoBehaviour
         isContentObjectCreated = true;
     }
 
-    private void AdjustGameObjectPlacement(Symbol symbol, GameObject newContentObject)
+    private void AdjustGameObjectLocation(Symbol symbol, GameObject newContentObject)
     {
-        // decrease the numbers to prevent floating precision limit error
+        LatLonH latlon = new LatLonH((float)symbol.Longitude, (float)symbol.Latitude, (float)symbol.Altitude);
+        Vector diff = CoordinateManager.Instance.ToWorldCoord(latlon);
+        newContentObject.transform.position = diff.toVector3();
         /*
-        float latdif = ((float)symbol.Latitude - (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude) * 100;
-        float londif = ((float)symbol.Longitude - (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude) * 100;
-        float altdif = ((float)symbol.Altitude - (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Altitude) * 1;
-        */
         float latdif = (float)symbol.Latitude * 100;
         float londif = (float)symbol.Longitude * 100;
         float altdif = (float)symbol.Altitude * 1;
 
         Vector diff = new Vector(londif, altdif, latdif);
         newContentObject.transform.position = diff.toVector3();
-        //Debug.Log("Object Name: " + obj.name + "Pos: " + obj.transform.position);
+        */
+    }
+
+    private void AdjustGameObjectRotation(GameObject newContentObject)
+    {
+        Vector3 relativePos = Camera.main.transform.position - newContentObject.transform.position;
+        relativePos = relativePos * -1;
+        Quaternion rotation = Quaternion.LookRotation(relativePos);
+        rotation.x = 0;
+        rotation.z = 0;
+        newContentObject.transform.rotation = rotation;
     }
 
     private void AdjustTexture(Symbol symbol, GameObject newContentObject)
@@ -244,6 +253,7 @@ public class ContentObjectsManager : MonoBehaviour
     {
         deleteContentObjectConfirmation.SetActive(false);
     }
+
     /// Place and distance should change dynamically, there is no need to destroy and create every time for this
     /// However  POST and GET required, and that reason dont work dynamically
     /*

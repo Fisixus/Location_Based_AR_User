@@ -4637,6 +4637,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 4efbf7c1080719b4eb6207cf1c8536e9, type: 3}
   - {fileID: 2800000, guid: 0c73a9177307e904392a37cde1bcee58, type: 3}
   - {fileID: 2800000, guid: c63e3c31f87b22744aceddc0dd062197, type: 3}
+  isContentObjectCreated: 0
 --- !u!1 &934921182
 GameObject:
   m_ObjectHideFlags: 0
@@ -4672,7 +4673,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -57.699707, y: 56.549896}
+  m_AnchoredPosition: {x: -57.699707, y: 56.549805}
   m_SizeDelta: {x: 57.8, y: 56.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &934921184
@@ -7583,7 +7584,6 @@ GameObject:
   - component: {fileID: 1563908186}
   - component: {fileID: 1563908185}
   - component: {fileID: 1563908184}
-  - component: {fileID: 1563908187}
   m_Layer: 0
   m_Name: BaseSymbolObject
   m_TagString: Untagged
@@ -7665,18 +7665,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1563908182}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &1563908187
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1563908182}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d686c716ba25f84295ea42329f8fb5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1585567955
 GameObject:
   m_ObjectHideFlags: 0
@@ -9172,6 +9160,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   contentObjects: {fileID: 596396167}
   arcCircleMain: {fileID: 228018301}
+  isMiniSymbolsCreated: 0
 --- !u!1 &1866716149
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,6 +15,11 @@ public class CursorManager : MonoBehaviour
     TextMeshProUGUI kmCounter;
     float km;
 
+    public float getKM()
+    {
+        return km;
+    }
+
 
     private void Start()
     {

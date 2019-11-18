@@ -16,7 +16,7 @@ public class CoordinateManager : MonoBehaviour
         Instance = this;
     }
 
-    public Vector toWorldCoord(LatLonH latlon)
+    public Vector ToWorldCoord(LatLonH latlon)
     {
         Vector t = new Vector();
 
@@ -28,14 +28,15 @@ public class CoordinateManager : MonoBehaviour
         float chi = Mathf.Sqrt(1.0f - E_KARE * sinLat * sinLat);
         float r = (EQUATORIAL_R / chi) + latlon.getAltitude();
 
-        t.setX(r * cosLat * cosLon);
-        t.setY(r * cosLat * sinLon);
-        t.setZ((r - EQUATORIAL_R * E_KARE / chi) * sinLat);
+        ///divided by a value(1000) because of floating point precision
+        t.setX((r * cosLat * cosLon)/1000);
+        //t.setY(r * cosLat * sinLon);
+        t.setZ(((r - EQUATORIAL_R * E_KARE / chi) * sinLat)/1000);
 
         return t;
     }
 
-    public void fromWorldCoord(Vector wc, LatLonH latlon)
+    public void FromWorldCoord(Vector wc, LatLonH latlon)
     {
         float ratio = wc.getY() / wc.getX();
         latlon.setLongitude(Mathf.Rad2Deg * Mathf.Atan(ratio));
@@ -53,7 +54,7 @@ public class CoordinateManager : MonoBehaviour
     //Calculate distance from LatLong in Meter
     public float GetDistanceFromLatLonInMeter(float lat1, float lon1, float lat2, float lon2)
     {
-        int R = 6371; // Radius of the earth in km
+        float R = EQUATORIAL_R/1000f; // Radius of the earth in km
         float dLat = Deg2rad(lat2 - lat1);  // deg2rad below
         float dLon = Deg2rad(lon2 - lon1);
         float a =
@@ -67,8 +68,35 @@ public class CoordinateManager : MonoBehaviour
         return distInMeter;
     }
 
+    /*
+    latitude of second point = la2 =  asin(sin la1 * cos Ad  + cos la1 * sin Ad * cos θ), and
+    longitude  of second point = lo2 = lo1 + atan2(sin θ * sin Ad * cos la1 , cos Ad – sin la1 * sin la2)
+    */
+    public LatLonH GetSecondLatLonPosByDistanceBearingAndFirstLatLonPos(float lat1, float lon1, float distance, float bearing)
+    {
+        /// distance and radius are kilometers
+        float R = EQUATORIAL_R/1000f;
+        float Ad = distance / R; ///Angular distance
+
+        LatLonH latLon2 = new LatLonH();
+        float dBearing = Deg2rad(bearing);
+        float dLat = Deg2rad(lat1);
+        float dLon = Deg2rad(lon1);
+
+        latLon2.setLatitude(Rad2Deg(Mathf.Asin(Mathf.Sin(dLat) * Mathf.Cos(Ad) + Mathf.Cos(dLat) * Mathf.Sin(Ad) * Mathf.Cos(dBearing))));
+        latLon2.setLongitude(Rad2Deg(dLon + Mathf.Atan2(Mathf.Sin(dBearing) * Mathf.Sin(Ad) * Mathf.Cos(dLat), Mathf.Cos(Ad) - Mathf.Sin(dLat) * Mathf.Sin(latLon2.getLatitude()))));
+        Debug.Log("Lat:" + latLon2.getLatitude());
+        Debug.Log("Lon:" + latLon2.getLongitude());
+        return latLon2;
+    }
+
     float Deg2rad(float deg)
     {
         return deg * (Mathf.PI / 180);
+    }
+
+    float Rad2Deg(float rad)
+    {
+        return rad * (180.0f / Mathf.PI);
     }
 }

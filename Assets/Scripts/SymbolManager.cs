@@ -62,53 +62,6 @@ public class SymbolManager : MonoBehaviour
         ArcMapManager.Instance.MiniSymbolCreator();
     }
 
-    private void Update()
-    {
-        if (addSymbolPanel.activeSelf) return;
-
-        ///For opening and closing changeImage
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-        if (Input.GetMouseButtonDown(0))
-#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
-#endif
-        {
-            if (!UIManager.Instance.FocusOnSymbolInfoPanel())
-            {
-                changeSymbolCategoryIcon.SetActive(!changeSymbolCategoryIcon.activeSelf);
-            }
-            ///If click focus on symbolInfoPanel then close the changeSymbolCategoryIcon
-            else
-            {
-                changeSymbolCategoryIcon.SetActive(false);
-            }
-        }
-
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-        if (Input.GetMouseButtonUp(0))
-#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        if (Input.touches[0].phase == TouchPhase.Ended)
-#endif
-        {
-            UIManager.Instance.ClearUIResults();
-        }
-
-        if (changeSymbolCategoryIcon.activeSelf)
-        {
-            ChangeSymbolImage();
-
-            ///For adding symbol 
-            if (Input.GetKeyDown(KeyCode.Joystick1Button0) || Input.GetKeyDown(KeyCode.Space))
-            {
-                addSymbolPanel.SetActive(true);
-                UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name);
-            }
-        }
-    }
-
-    
-
-
     /// When the clicked to add button event, in another name AddContentObject
     public void AddSymbol()
     {
@@ -156,7 +109,7 @@ public class SymbolManager : MonoBehaviour
             symbol.UserUUID = UserManager.Instance.FindUserUUIDbyUsername(UIManager.Instance.getUsername());
             //Debug.Log("UserUUID:" + symbol.UserUUID);
 
-            WebServiceManager.Instance.AddSymbol(symbol);
+            //WebServiceManager.Instance.AddSymbol(symbol);
             //Invoke("RefreshUserSymbols", 3f);
         }
 
@@ -238,5 +191,52 @@ public class SymbolManager : MonoBehaviour
             }
         }
         return symbol;
+    }
+
+    private void Update()
+    {
+        if (addSymbolPanel.activeSelf) return;
+
+        ///For opening and closing changeImage
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetMouseButtonDown(0))
+#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+#endif
+        {
+            if (!UIManager.Instance.FocusOnSymbolInfoPanel())
+            {
+                changeSymbolCategoryIcon.SetActive(!changeSymbolCategoryIcon.activeSelf);
+            }
+            ///If click focus on symbolInfoPanel then close the changeSymbolCategoryIcon
+            else
+            {
+                changeSymbolCategoryIcon.SetActive(false);
+            }
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetMouseButtonUp(0))
+#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        if (Input.touches[0].phase == TouchPhase.Ended)
+#endif
+        {
+            UIManager.Instance.ClearUIResults();
+        }
+
+        if (changeSymbolCategoryIcon.activeSelf)
+        {
+            ChangeSymbolImage();
+
+            ///For adding symbol 
+            if (Input.GetKeyDown(KeyCode.Joystick1Button0) || Input.GetKeyDown(KeyCode.Space))
+            {
+                addSymbolPanel.SetActive(true);
+                LatLonH latlon = new LatLonH(31.43434f, 43.345454545f, 0.0f);
+                User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
+                //LatLonH latlon2 = CoordinateManager.Instance.GetSecondLatLonPosByDistanceBearingAndFirstLatLonPos((float)user.Latitude, (float)user.Longitude, 7000f, 90f);
+                UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name, latlon);
+            }
+        }
     }
 }
