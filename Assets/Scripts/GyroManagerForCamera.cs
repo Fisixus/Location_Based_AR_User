@@ -25,15 +25,27 @@ public class GyroManagerForCamera : MonoBehaviour
 
     public void CameraPlacerByDistance()
     {
-        //This is for editor
+        ///This is for editor
         if (Application.isEditor)
         {
             UIManager.Instance.AutoLoadLatLotAltPanel(UserManager.Instance.FindUser(UIManager.Instance.getUsername()));
         }
-        User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
-        LatLonH latlon = new LatLonH((float)user.Longitude, (float)user.Latitude, (float)user.Altitude);
-        Vector diff = CoordinateManager.Instance.ToWorldCoord(latlon);
-        transform.parent.position = diff.toVector3();
+
+        ///Dont use FindUser because want to see that update of distance instantly
+        //User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
+        User user = UserManager.Instance.getOnlineUser();
+        if(user != null)
+        {
+            LatLonH latlon = new LatLonH((float)user.Longitude, (float)user.Latitude, (float)user.Altitude);
+            Vector diff = CoordinateManager.Instance.ToWorldCoord(latlon);
+            transform.parent.position = diff.toVector3();
+        }
+        else
+        {
+            Debug.Log("Connected user cannot find!");
+        }
+
+        ///Dont use because of the unity floating point precision
         /*
         float latdif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude * 100;
         float londif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude * 100;
@@ -63,7 +75,8 @@ public class GyroManagerForCamera : MonoBehaviour
     {
         if (gyroEnabled)
         {
-            transform.localRotation = gyro.attitude * rot;
+            //transform.localRotation = gyro.attitude * rot;
+            transform.parent.rotation = gyro.attitude * rot;
         }
     }
 }

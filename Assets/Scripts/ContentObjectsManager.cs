@@ -44,18 +44,22 @@ public class ContentObjectsManager : MonoBehaviour
     {
         DestroyContentObjects();
         string data = WebServiceManager.Instance.getSymbolsData();
+        if (data.Equals(""))
+        {
+            Debug.Log("Waiting connection!");
+            return;
+        }
         symbols = JsonConvert.DeserializeObject<List<Symbol>>(data);
 
         foreach(Symbol symbol in symbols)
         {
             GameObject newContentObject = Instantiate(baseSymbolObject) as GameObject;
-            //cubeNew.GetComponent<Renderer>().enabled = true;
-            //cubeNew.transform.GetChild(0).GetComponent<Renderer>().enabled = true;
-            newContentObject.SetActive(true);
             newContentObject.transform.parent = contentObjects.transform;
             //newContentObject.tag = symbol.Category.ToString();
             newContentObject.name = symbol.SymbolName;
+            
             //newContentObject.transform.localEulerAngles = new Vector3(-90, 0, 0);
+            GiveContentObjectName(newContentObject);
             AdjustGameObjectLocation(symbol, newContentObject);
             AdjustGameObjectRotation(newContentObject);
             AdjustTexture(symbol, newContentObject);
@@ -72,11 +76,24 @@ public class ContentObjectsManager : MonoBehaviour
         isContentObjectCreated = true;
     }
 
+    private void GiveContentObjectName(GameObject newContentObject)
+    {
+        foreach (TextMeshProUGUI symbolNameText in newContentObject.transform.GetComponentsInChildren<TextMeshProUGUI>())
+        {
+            if (symbolNameText.gameObject.name.Equals("SymbolNameText"))
+            {
+                symbolNameText.text = newContentObject.name;
+            }
+        }
+    }
+
     private void AdjustGameObjectLocation(Symbol symbol, GameObject newContentObject)
     {
         LatLonH latlon = new LatLonH((float)symbol.Longitude, (float)symbol.Latitude, (float)symbol.Altitude);
         Vector diff = CoordinateManager.Instance.ToWorldCoord(latlon);
         newContentObject.transform.position = diff.toVector3();
+
+        ///Dont use because of the unity floating point precision
         /*
         float latdif = (float)symbol.Latitude * 100;
         float londif = (float)symbol.Longitude * 100;
@@ -183,22 +200,45 @@ public class ContentObjectsManager : MonoBehaviour
 
     private void AdjustDistance(Symbol symbol, GameObject newContentObject)
     {
-        float distanceToSymbol =
-                CoordinateManager.Instance.GetDistanceFromLatLonInMeter((float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude, (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude, (float)symbol.Latitude, (float)symbol.Longitude);
-        Debug.Log("Distance:" + distanceToSymbol);
-
-        if (newContentObject.transform.GetChild(0) != null)
+        ///Dont use FindUser because want to see that update of distance instantly
+        //User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
+        User user = UserManager.Instance.getOnlineUser();
+        if(user != null)
         {
-            if (distanceToSymbol < 1000.0f)
+            float distanceToSymbol =
+                    CoordinateManager.Instance.GetDistanceFromLatLonInMeter((float)user.Latitude, (float)user.Longitude, (float)symbol.Latitude, (float)symbol.Longitude);
+            //Debug.Log("Distance:" + distanceToSymbol);
+
+            if (newContentObject.transform.GetChild(0) != null)
             {
-                float inMeter = distanceToSymbol;
-               newContentObject.transform.GetComponentInChildren<TextMeshProUGUI>().text = inMeter.ToString("F1") + "\n" + "metre";
+                if (distanceToSymbol < 1000.0f)
+                {
+                    float inMeter = distanceToSymbol;
+                    foreach(TextMeshProUGUI distanceText in newContentObject.transform.GetComponentsInChildren<TextMeshProUGUI>())
+                    {
+                        if (distanceText.gameObject.name.Equals("DistanceText"))
+                        {
+                            distanceText.text = inMeter.ToString("F1") + "\n" + "metre";
+                        }
+                    }
+                }
+                else
+                {
+                    float inKm = distanceToSymbol / 1000;
+                    foreach (TextMeshProUGUI distanceText in newContentObject.transform.GetComponentsInChildren<TextMeshProUGUI>())
+                    {
+                        if (distanceText.gameObject.name.Equals("DistanceText"))
+                        {
+                            distanceText.text = inKm.ToString("F2") + "\n" + "km";
+                        }
+                    }
+                }
             }
-            else
-            {
-                float inKm = distanceToSymbol / 1000;
-               newContentObject.transform.GetComponentInChildren<TextMeshProUGUI>().text = inKm.ToString("F2") + "\n" + "km";
-            }
+
+        }
+        else
+        {
+            Debug.Log("Connected user cannot find!");
         }
     }
     
@@ -231,11 +271,19 @@ public class ContentObjectsManager : MonoBehaviour
     public void DeleteContentObjectConfirm()
     {
         string username = UIManager.Instance.getUsername();
-        WebServiceManager.Instance.DeleteSymbol(SymbolManager.Instance.FindSymbolByName(selectedSymbolName).getUUID, UserManager.Instance.FindUserUUIDbyUsername(username));
         CloseSymbolConfirmationWindow();
 
+        Symbol deletingSymbol = SymbolManager.Instance.FindSymbolByName(selectedSymbolName);
+        if(deletingSymbol != null)
+        {
+            WebServiceManager.Instance.DeleteSymbol(deletingSymbol.getUUID, UserManager.Instance.FindUserUUIDbyUsername(username));
+        }
+        else
+        {
+            Debug.Log("Delete ERROR!");
+        }
         
-        Invoke("CallRefreshUserSymbols", 3f);
+        //Invoke("CallRefreshUserSymbols", 3f);
     }
 
     private void CallRefreshUserSymbols()
@@ -255,9 +303,7 @@ public class ContentObjectsManager : MonoBehaviour
     }
 
     /// Place and distance should change dynamically, there is no need to destroy and create every time for this
-    /// However  POST and GET required, and that reason dont work dynamically
-    /*
-    public void DynamicallyAdjustPlaceAndDistance()
+    public void DynamicallyAdjustRotationAndDistance()
     {
         foreach (Transform _symbols in contentObjects.transform)
         {
@@ -266,23 +312,23 @@ public class ContentObjectsManager : MonoBehaviour
                 Symbol symbol = SymbolManager.Instance.FindSymbolByName(_symbols.gameObject.name);
                 if(symbol != null)
                 {
-                    AdjustGameObjectPlacement(symbol, _symbols.gameObject);
-                    AdjustScale(_symbols.gameObject);
+                    //AdjustGameObjectLocation(symbol, _symbols.gameObject);
+                    AdjustGameObjectRotation(_symbols.gameObject);
+                    //AdjustScale(_symbols.gameObject);
                     AdjustDistance(symbol, _symbols.gameObject);
                 }
             }
         }
     }
     
-    
     private void LateUpdate()
     {
         if (isContentObjectCreated)
         {
-            DynamicallyAdjustPlaceAndDistance();
+            DynamicallyAdjustRotationAndDistance();
         }
     }
-    */
+    
     private void Update()
     {
 
@@ -300,7 +346,7 @@ public class ContentObjectsManager : MonoBehaviour
                     selectedSymbolObject.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false;
                     selectedSymbolInfoPanel.SetActive(false);
                     selectedSymbolObject = null;
-                    selectedSymbolName = string.Empty;
+                    //selectedSymbolName = string.Empty;
                 }
             }
             Ray ray;
@@ -315,7 +361,7 @@ public class ContentObjectsManager : MonoBehaviour
             {
                 selectedSymbolObject = hitPoint.transform.gameObject;
                 selectedSymbolName = selectedSymbolObject.name;
-                Debug.Log(selectedSymbolObject.name);
+                Debug.Log("Selected Symbol:" + selectedSymbolObject.name);
                 Symbol symbol = null;
                 if (selectedSymbolObject != null)
                 {                    

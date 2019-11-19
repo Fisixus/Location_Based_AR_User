@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class CursorManager : MonoBehaviour
 {
+    public static CursorManager Instance;
+
     public GameObject cursor;
 
     public int scaleRate = 3500;
@@ -20,6 +22,10 @@ public class CursorManager : MonoBehaviour
         return km;
     }
 
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {

@@ -20,6 +20,16 @@ public class UserManager : MonoBehaviour
     bool isLocationServiceActive = false;
     int maxWait = 30;
 
+    public void setOnlineUser(User user)
+    {
+        onlineUser = user;
+    }
+
+    public User getOnlineUser()
+    {
+        return onlineUser;
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -221,6 +231,8 @@ public class UserManager : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
+
+    ///Online user's location always be on updated, but POST it in  every 3seconds period
     private void LateUpdate()
     {
         if(onlineUser != null && isLocationServiceActive)

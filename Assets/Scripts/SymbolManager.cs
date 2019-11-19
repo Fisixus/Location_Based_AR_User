@@ -36,20 +36,26 @@ public class SymbolManager : MonoBehaviour
 
     private void Start()
     {
-        Initiliaze();      
+        Initiliaze();
+        
         ///It is repeating because admin assign or delete symbol from user too
-        InvokeRepeating("RefreshUserSymbols", 1f, 5f);
+        InvokeRepeating("RefreshUserSymbols", 2f, 4f);
     }
 
     public void RefreshUserSymbols()
     {
+        if(UserManager.Instance.getOnlineUser() == null)
+        {
+            UserManager.Instance.setOnlineUser(UserManager.Instance.FindUser(UIManager.Instance.getUsername()));
+        }
+
         ContentObjectsManager.Instance.isContentObjectCreated = false;
         //ArcMapManager.Instance.isMiniSymbolsCreated = false;
         CancelInvoke("RefreshContentIcons");
         CancelInvoke("RefreshArcMap");
         WebServiceManager.Instance.GetSymbols(UserManager.Instance.FindUserUUIDbyUsername(UIManager.Instance.getUsername()));
-        Invoke("RefreshContentIcons", 3.5f);
-        Invoke("RefreshArcMap", 4.5f);
+        Invoke("RefreshContentIcons", 3f);
+        Invoke("RefreshArcMap", 3.5f);
     }
 
     private void RefreshContentIcons()
@@ -104,12 +110,15 @@ public class SymbolManager : MonoBehaviour
             symbol.Category = (Category)Enum.Parse(typeof(Category), categoryDATA);
             if (messageDATA.Equals("")) messageDATA = "-";
             symbol.Message = messageDATA;
+
             //Debug.Log("MessageData:" + messageDATA);
             //Debug.Log("SymbolOwner:" + symbolOwnerDATA);
             symbol.UserUUID = UserManager.Instance.FindUserUUIDbyUsername(UIManager.Instance.getUsername());
             //Debug.Log("UserUUID:" + symbol.UserUUID);
 
-            //WebServiceManager.Instance.AddSymbol(symbol);
+            CloseAddSymbolPanel();
+
+            WebServiceManager.Instance.AddSymbol(symbol);
             //Invoke("RefreshUserSymbols", 3f);
         }
 
@@ -156,6 +165,10 @@ public class SymbolManager : MonoBehaviour
 
     public void CloseAddSymbolPanel()
     {
+        ///For refresh the writed data
+        addSymbolPanel.transform.Find("ScrollView/ContentPanel/SymbolNameDATA").GetComponent<InputField>().text = "";
+        addSymbolPanel.transform.Find("ScrollView/ContentPanel/MessageDATA").GetComponentInChildren<InputField>().text = "";
+
         addSymbolPanel.SetActive(false);
     }
 
@@ -232,10 +245,19 @@ public class SymbolManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Joystick1Button0) || Input.GetKeyDown(KeyCode.Space))
             {
                 addSymbolPanel.SetActive(true);
-                LatLonH latlon = new LatLonH(31.43434f, 43.345454545f, 0.0f);
-                User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
-                //LatLonH latlon2 = CoordinateManager.Instance.GetSecondLatLonPosByDistanceBearingAndFirstLatLonPos((float)user.Latitude, (float)user.Longitude, 7000f, 90f);
-                UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name, latlon);
+                ///Dont use FindUser because want to see that update of distance instantly
+                //User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
+                User user = UserManager.Instance.getOnlineUser();
+                if (user != null)
+                {
+                    LatLonH latlon2 = CoordinateManager.Instance.GetSecondLatLonPosByDistanceBearingAndFirstLatLonPos((float)user.Latitude, (float)user.Longitude, CursorManager.Instance.getKM(), Camera.main.transform.parent.rotation.eulerAngles.y);
+                    //Debug.Log("local:" + Camera.main.transform.parent.rotation.eulerAngles);
+                    UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name, latlon2);
+                }
+                else
+                {
+                    Debug.Log("Connected user cannot find!");
+                }
             }
         }
     }
