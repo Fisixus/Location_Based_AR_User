@@ -75,8 +75,8 @@ public class GyroManagerForCamera : MonoBehaviour
     {
         if (gyroEnabled)
         {
-            //transform.localRotation = gyro.attitude * rot;
-            transform.parent.rotation = gyro.attitude * rot;
+            transform.localRotation = gyro.attitude * rot;
+            //transform.parent.rotation = gyro.attitude * rot;
         }
     }
 }

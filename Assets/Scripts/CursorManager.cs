@@ -37,11 +37,7 @@ public class CursorManager : MonoBehaviour
     {
         if (GameObject.Find("/Canvas/AddSymbolPanel")) return;
 
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
         if (Input.GetMouseButtonDown(0))
-#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
-#endif
         {
             if (!UIManager.Instance.FocusOnSymbolInfoPanel())
             {
@@ -54,18 +50,13 @@ public class CursorManager : MonoBehaviour
             }
         }
 
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
         if (Input.GetMouseButtonUp(0))
-#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        if (Input.touches[0].phase == TouchPhase.Ended)
-#endif
         {
             UIManager.Instance.ClearUIResults();
         }
 
         if (cursor.activeSelf)
         {
-
             endPoint = cursor.transform.position;
 
             if (Input.GetKey(KeyCode.UpArrow) && km <= 20f)

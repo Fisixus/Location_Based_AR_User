@@ -60,8 +60,11 @@ public class ArcMapManager : MonoBehaviour
 
     private void AdjustAngleOfMiniSymbols(Transform _symbols, GameObject miniObj)
     {
-        Vector3 target = _symbols.transform.position - Camera.main.transform.parent.position;
-        Vector3 camera = Camera.main.transform.parent.forward;
+        //Vector3 target = _symbols.transform.position - Camera.main.transform.parent.position;
+        //Vector3 camera = Camera.main.transform.parent.forward;
+
+        Vector3 target = _symbols.transform.position - Camera.main.transform.position;
+        Vector3 camera = Camera.main.transform.forward;
 
         angleDiff = Vector3.SignedAngle(camera, target, -Vector3.up);
         miniObj.transform.localEulerAngles = new Vector3(0, 0, angleDiff);

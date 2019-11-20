@@ -331,12 +331,7 @@ public class ContentObjectsManager : MonoBehaviour
     
     private void Update()
     {
-
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
         if (Input.GetMouseButton(0))
-#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
-#endif
         {
             ///When click anything except symbolinfoPanel dismiss the focus on symbolinfoPanel
             if (!UIManager.Instance.FocusOnSymbolInfoPanel())
@@ -349,11 +344,8 @@ public class ContentObjectsManager : MonoBehaviour
                     //selectedSymbolName = string.Empty;
                 }
             }
-            Ray ray;
-            if(Application.isEditor)
-                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            else
-                ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             RaycastHit hitPoint;
 
@@ -377,11 +369,7 @@ public class ContentObjectsManager : MonoBehaviour
 
         }
 
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
         if (Input.GetMouseButtonUp(0))
-#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        if (Input.touches[0].phase == TouchPhase.Ended)
-#endif
         {
             UIManager.Instance.ClearUIResults();
         }

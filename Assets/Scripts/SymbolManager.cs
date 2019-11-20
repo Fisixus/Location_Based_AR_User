@@ -211,11 +211,7 @@ public class SymbolManager : MonoBehaviour
         if (addSymbolPanel.activeSelf) return;
 
         ///For opening and closing changeImage
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-        if (Input.GetMouseButtonDown(0))
-#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
-#endif
+        if (Input.GetMouseButtonDown(0)) 
         {
             if (!UIManager.Instance.FocusOnSymbolInfoPanel())
             {
@@ -228,11 +224,7 @@ public class SymbolManager : MonoBehaviour
             }
         }
 
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
         if (Input.GetMouseButtonUp(0))
-#elif (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        if (Input.touches[0].phase == TouchPhase.Ended)
-#endif
         {
             UIManager.Instance.ClearUIResults();
         }
@@ -242,7 +234,7 @@ public class SymbolManager : MonoBehaviour
             ChangeSymbolImage();
 
             ///For adding symbol 
-            if (Input.GetKeyDown(KeyCode.Joystick1Button0) || Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.Space))
             {
                 addSymbolPanel.SetActive(true);
                 ///Dont use FindUser because want to see that update of distance instantly
@@ -250,8 +242,10 @@ public class SymbolManager : MonoBehaviour
                 User user = UserManager.Instance.getOnlineUser();
                 if (user != null)
                 {
-                    LatLonH latlon2 = CoordinateManager.Instance.GetSecondLatLonPosByDistanceBearingAndFirstLatLonPos((float)user.Latitude, (float)user.Longitude, CursorManager.Instance.getKM(), Camera.main.transform.parent.rotation.eulerAngles.y);
-                    //Debug.Log("local:" + Camera.main.transform.parent.rotation.eulerAngles);
+
+                    //TODO bearing angle is quaternion type but it should be angle?
+                    LatLonH latlon2 = CoordinateManager.Instance.GetSecondLatLonPosByDistanceBearingAndFirstLatLonPos((float)user.Latitude, (float)user.Longitude, CursorManager.Instance.getKM(), Camera.main.transform.localRotation.y);
+                    Debug.Log("local:" + Camera.main.transform.localRotation);
                     UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name, latlon2);
                 }
                 else
