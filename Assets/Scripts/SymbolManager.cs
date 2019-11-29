@@ -20,7 +20,7 @@ public class SymbolManager : MonoBehaviour
     RawImage changedImage;
     TextMeshProUGUI changedImageCategoryName;
 
-    private void Awake()
+    private void Awake() 
     {
         Instance = this;
     }
@@ -49,7 +49,7 @@ public class SymbolManager : MonoBehaviour
             UserManager.Instance.setOnlineUser(UserManager.Instance.FindUser(UIManager.Instance.getUsername()));
         }
 
-        ContentObjectsManager.Instance.isContentObjectCreated = false;
+        ContentObjectsManager.Instance.setIsContentObjectCreated(false);
         //ArcMapManager.Instance.isMiniSymbolsCreated = false;
         CancelInvoke("RefreshContentIcons");
         CancelInvoke("RefreshArcMap");
@@ -112,7 +112,7 @@ public class SymbolManager : MonoBehaviour
             symbol.Message = messageDATA;
 
             //Debug.Log("MessageData:" + messageDATA);
-            //Debug.Log("SymbolOwner:" + symbolOwnerDATA);
+
             symbol.UserUUID = UserManager.Instance.FindUserUUIDbyUsername(UIManager.Instance.getUsername());
             //Debug.Log("UserUUID:" + symbol.UserUUID);
 
@@ -242,11 +242,21 @@ public class SymbolManager : MonoBehaviour
                 User user = UserManager.Instance.getOnlineUser();
                 if (user != null)
                 {
+                    ///Works fine but mathematical solution needs more accurate value(lat,lon)
+                    if (Application.isEditor)
+                    {
+                        LatLonH latlon2 = CoordinateManager.Instance.FindSecondLatLonPosByDistanceBearingAndFirstLatLonPos((float)user.Latitude, (float)user.Longitude, CursorManager.Instance.getKM(), Camera.main.transform.parent.eulerAngles.y);
 
-                    //TODO bearing angle is quaternion type but it should be angle?
-                    LatLonH latlon2 = CoordinateManager.Instance.GetSecondLatLonPosByDistanceBearingAndFirstLatLonPos((float)user.Latitude, (float)user.Longitude, CursorManager.Instance.getKM(), Camera.main.transform.localRotation.y);
-                    Debug.Log("local:" + Camera.main.transform.localRotation);
-                    UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name, latlon2);
+                        UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name, latlon2);
+                    }
+                    //TODO bearing angle is quaternion type(-1,1) but it should be an angle, conversion amongst quaternion to eulerangles not working right because of the gyro
+                    else
+                    {
+                        LatLonH latlon2 = CoordinateManager.Instance.FindSecondLatLonPosByDistanceBearingAndFirstLatLonPos((float)user.Latitude, (float)user.Longitude, CursorManager.Instance.getKM(), Camera.main.transform.localEulerAngles.y);
+                        //LatLonH latlon2 = CoordinateManager.Instance.FindLocationOfSecondPoint(CursorManager.Instance.getKM());
+                        UIManager.Instance.AutoLoadtoAddPanel(textureList[textureIndex].name, latlon2);
+                    }
+                    
                 }
                 else
                 {

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -47,12 +48,13 @@ public class CoordinateManager : MonoBehaviour
         float cosT = Mathf.Cos(theta);
 
         float latitudeRad = Mathf.Atan((wc.getZ() + E_PRIME_KARE * POLAR_R * sinT * sinT * sinT) / (p - E_KARE * EQUATORIAL_R * cosT * cosT * cosT));
-        latlon.setAltitude((p / Mathf.Cos(latitudeRad) - EQUATORIAL_R / Mathf.Sqrt(1.0f - E_KARE * Mathf.Sin(latitudeRad) * Mathf.Sin(latitudeRad))));
+        //latlon.setAltitude((p / Mathf.Cos(latitudeRad) - EQUATORIAL_R / Mathf.Sqrt(1.0f - E_KARE * Mathf.Sin(latitudeRad) * Mathf.Sin(latitudeRad))));
+        latlon.setAltitude(0f);
         latlon.setLatitude(Mathf.Rad2Deg * latitudeRad);
     }
 
     //Calculate distance from LatLong in Meter
-    public float GetDistanceFromLatLonInMeter(float lat1, float lon1, float lat2, float lon2)
+    public float FindDistanceFromLatLonInMeter(float lat1, float lon1, float lat2, float lon2)
     {
         float R = EQUATORIAL_R/1000f; // Radius of the earth in km
         float dLat = Deg2rad(lat2 - lat1);  // deg2rad below
@@ -72,7 +74,7 @@ public class CoordinateManager : MonoBehaviour
     latitude of second point = la2 =  asin(sin la1 * cos Ad  + cos la1 * sin Ad * cos θ), and
     longitude  of second point = lo2 = lo1 + atan2(sin θ * sin Ad * cos la1 , cos Ad – sin la1 * sin la2)
     */
-    public LatLonH GetSecondLatLonPosByDistanceBearingAndFirstLatLonPos(float lat1, float lon1, float distance, float bearing)
+    public LatLonH FindSecondLatLonPosByDistanceBearingAndFirstLatLonPos(float lat1, float lon1, float distance, float bearing)
     {
         /// distance and radius are kilometers
         float R = EQUATORIAL_R/1000f;
@@ -99,4 +101,38 @@ public class CoordinateManager : MonoBehaviour
     {
         return rad * (180.0f / Mathf.PI);
     }
+
+    //TODO Alternative of  FindSecondLatLonPosByDistanceBearingAndFirstLatLonPos, not working either
+    public LatLonH FindLocationOfSecondPoint(float distance)
+    {
+        distance = distance * 1000f;
+        Vector3 worldCord = Camera.main.transform.forward * distance;
+        Vector vec = new Vector(worldCord.x, worldCord.y, worldCord.z);
+        LatLonH latlon = new LatLonH();
+        FromWorldCoord(vec, latlon);
+        return latlon;
+
+    }
+
+    /*
+    public Vector3 FromQ2(Quaternion q)
+    {
+        // Store the Euler angles in radians
+        Vector3 pitchYawRoll = new Vector3();
+
+        double sqw = q.w * q.w;
+        double sqx = q.x * q.x;
+        double sqy = q.y * q.y;
+        double sqz = q.z * q.z;
+
+        // If quaternion is normalised the unit is one, otherwise it is the correction factor
+        double unit = sqx + sqy + sqz + sqw;
+        double test = q.x * q.y + q.z * q.w;
+        pitchYawRoll.y = (float)Math.Atan2(2f * q.x * q.w + 2f * q.y * q.z, 1 - 2f * (sqz + sqw));     // Yaw 
+        pitchYawRoll.x = (float)Math.Asin(2f * (q.x * q.z - q.w * q.y));                             // Pitch 
+        pitchYawRoll.z = (float)Math.Atan2(2f * q.x * q.y + 2f * q.z * q.w, 1 - 2f * (sqy + sqz));
+        return pitchYawRoll;
+    }
+    */
+
 }

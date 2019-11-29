@@ -6,7 +6,6 @@ using UnityEngine;
 public class GyroManagerForCamera : MonoBehaviour
 {
     public static GyroManagerForCamera Instance;
-
     bool gyroEnabled;
     Gyroscope gyro;
     Quaternion rot;
@@ -25,11 +24,9 @@ public class GyroManagerForCamera : MonoBehaviour
 
     public void CameraPlacerByDistance()
     {
-        ///This is for editor
-        if (Application.isEditor)
-        {
-            UIManager.Instance.AutoLoadLatLotAltPanel(UserManager.Instance.FindUser(UIManager.Instance.getUsername()));
-        }
+        ///This is static location of the online user, dynamic part in UserManager is not working        
+        UIManager.Instance.AutoLoadLatLotAltPanel(UserManager.Instance.FindUser(UIManager.Instance.getUsername()));
+        
 
         ///Dont use FindUser because want to see that update of distance instantly
         //User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
@@ -74,8 +71,8 @@ public class GyroManagerForCamera : MonoBehaviour
     private void Update()
     {
         if (gyroEnabled)
-        {
-            transform.localRotation = gyro.attitude * rot;
+        {            
+            transform.localRotation = gyro.attitude * rot;            
             //transform.parent.rotation = gyro.attitude * rot;
         }
     }

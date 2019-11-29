@@ -21,7 +21,17 @@ public class ContentObjectsManager : MonoBehaviour
     List<Symbol> symbols = new List<Symbol>();
     string selectedSymbolName;
 
-    public bool isContentObjectCreated = false;
+    bool isContentObjectCreated = false;
+
+    public bool getIsContentObjectCreated()
+    {
+        return isContentObjectCreated;
+    }
+
+    public void setIsContentObjectCreated(bool value)
+    {
+        isContentObjectCreated = value;
+    }
 
     public void Awake()
     {
@@ -206,7 +216,7 @@ public class ContentObjectsManager : MonoBehaviour
         if(user != null)
         {
             float distanceToSymbol =
-                    CoordinateManager.Instance.GetDistanceFromLatLonInMeter((float)user.Latitude, (float)user.Longitude, (float)symbol.Latitude, (float)symbol.Longitude);
+                    CoordinateManager.Instance.FindDistanceFromLatLonInMeter((float)user.Latitude, (float)user.Longitude, (float)symbol.Latitude, (float)symbol.Longitude);
             //Debug.Log("Distance:" + distanceToSymbol);
 
             if (newContentObject.transform.GetChild(0) != null)
@@ -302,6 +312,7 @@ public class ContentObjectsManager : MonoBehaviour
         deleteContentObjectConfirmation.SetActive(false);
     }
 
+    //TODO This is still useless because of Destroy&Create Algorithm also Input.location is not working!
     /// Place and distance should change dynamically, there is no need to destroy and create every time for this
     public void DynamicallyAdjustRotationAndDistance()
     {

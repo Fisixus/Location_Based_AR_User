@@ -18,7 +18,6 @@ public class UserManager : MonoBehaviour
     User onlineUser = null;
     string locationStatus;
     bool isLocationServiceActive = false;
-    int maxWait = 30;
 
     public void setOnlineUser(User user)
     {
@@ -155,16 +154,18 @@ public class UserManager : MonoBehaviour
         //Input.location.Stop();
     }
 
+
+    //TODO It gives problem on Epson350, in 3 days research cannot find a solution. 
     IEnumerator ControlLocationService()
     {
-        //Check whether is in editor
+        ///Check whether is in editor
         if (Application.isEditor)
         {            
             isLocationServiceActive = false;
             locationStatus = "Editor Mode.";
             yield break;
         }
-        // Check if user has location service enabled
+        /// Check if user has location service enabled
         if (!Input.location.isEnabledByUser)
         {
             isLocationServiceActive = false;
@@ -173,18 +174,18 @@ public class UserManager : MonoBehaviour
             yield break;
         }
 
-        // Start service before querying location
+        /// Start service before querying location
         locationStatus = "Location Service is Started.";
         Input.location.Start(5, 5);
-
-        // Wait until service initializes
+        int maxWait = 30;
+        /// Wait until service initializes
         while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
         {
             yield return new WaitForSeconds(1);
             maxWait--;
         }
 
-        // Service didn't initialize in 30 seconds
+        /// Service didn't initialize in 30 seconds
         if (maxWait < 1)
         {
             isLocationServiceActive = false;
@@ -193,7 +194,7 @@ public class UserManager : MonoBehaviour
             yield break;
         }
 
-        // Connection has failed
+        /// Connection has failed
         if (Input.location.status == LocationServiceStatus.Failed)
         {
             isLocationServiceActive = false;
@@ -212,12 +213,7 @@ public class UserManager : MonoBehaviour
     {
         //locationStatus = "Location Service Active..";
         if(onlineUser != null)
-        {
-            onlineUser.Latitude = (decimal)Input.location.lastData.latitude;
-            onlineUser.Longitude = (decimal)Input.location.lastData.longitude;
-            onlineUser.Altitude = (decimal)Input.location.lastData.altitude;
-            UIManager.Instance.AutoLoadLatLotAltPanel(onlineUser);
-            GyroManagerForCamera.Instance.CameraPlacerByDistance();
+        {           
             WebServiceManager.Instance.UpdateUser(onlineUser);
         }
 
