@@ -143,7 +143,16 @@ public class UserManager : MonoBehaviour
         {
             PlayerPrefs.DeleteAll();
             PlayerPrefs.SetString("Username", usernameDATA);
-            StartCoroutine(ControlLocationService());
+            onlineUser.Online = true;
+            ///Check whether is in editor
+            if (Application.isEditor)
+            {
+                OnlineUserUpdater();
+            }
+            else
+            {
+                StartCoroutine(ControlLocationService());
+            }
             SceneManager.LoadScene(1);
         }
         else
@@ -158,19 +167,12 @@ public class UserManager : MonoBehaviour
     //TODO It gives problem on Epson350, in 3 days research cannot find a solution. 
     IEnumerator ControlLocationService()
     {
-        ///Check whether is in editor
-        if (Application.isEditor)
-        {            
-            isLocationServiceActive = false;
-            locationStatus = "Editor Mode.";
-            yield break;
-        }
         /// Check if user has location service enabled
         if (!Input.location.isEnabledByUser)
         {
             isLocationServiceActive = false;
             locationStatus = "Device Location Service is Inactive.";
-            CancelInvoke("LocationUpdater");
+            CancelInvoke("OnlineUserUpdater");
             yield break;
         }
 
@@ -190,7 +192,6 @@ public class UserManager : MonoBehaviour
         {
             isLocationServiceActive = false;
             locationStatus = "Location Service TimeOut!";
-
             yield break;
         }
 
@@ -199,17 +200,17 @@ public class UserManager : MonoBehaviour
         {
             isLocationServiceActive = false;
             locationStatus = "Location Service Failed!";
-            CancelInvoke("LocationUpdater");
+            CancelInvoke("OnlineUserUpdater");
             yield break;
         }
         else
         {
             isLocationServiceActive = true;
-            InvokeRepeating("LocationUpdater", 3, 3);
+            InvokeRepeating("OnlineUserUpdater", 3, 3);
         }
     }
 
-    public void LocationUpdater()
+    void OnlineUserUpdater()
     {
         //locationStatus = "Location Service Active..";
         if(onlineUser != null)
@@ -223,6 +224,8 @@ public class UserManager : MonoBehaviour
 
     public void ExitBodyScene()
     {
+        onlineUser.Online = false;
+        OnlineUserUpdater();
         PlayerPrefs.DeleteAll();
         SceneManager.LoadScene(0);
     }
