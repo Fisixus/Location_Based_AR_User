@@ -151,6 +151,9 @@ public class UserManager : MonoBehaviour
             }
             else
             {
+                //TODO Delete OnlineUserUpdater from this line when 'ControlLocationService' works correctly! 
+                OnlineUserUpdater();
+
                 StartCoroutine(ControlLocationService());
             }
             SceneManager.LoadScene(1);

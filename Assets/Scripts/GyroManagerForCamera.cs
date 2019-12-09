@@ -24,11 +24,12 @@ public class GyroManagerForCamera : MonoBehaviour
 
     public void CameraPlacerByDistance()
     {
-        ///This is static location of the online user, dynamic part in UserManager is not working        
+        //TODO This is static location of the online user, dynamic part in UserManager is not working        
         UIManager.Instance.AutoLoadLatLotAltPanel(UserManager.Instance.FindUser(UIManager.Instance.getUsername()));
         
 
         ///Dont use FindUser because want to see that update of distance instantly
+        ///
         //User user = UserManager.Instance.FindUser(UIManager.Instance.getUsername());
         User user = UserManager.Instance.getOnlineUser();
         if(user != null)
@@ -42,7 +43,7 @@ public class GyroManagerForCamera : MonoBehaviour
             Debug.Log("Connected user cannot find!");
         }
 
-        ///Dont use because of the unity floating point precision
+        ///Dont use that because of the unity floating point precision
         /*
         float latdif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Latitude * 100;
         float londif = (float)UserManager.Instance.FindUser(UIManager.Instance.getUsername()).Longitude * 100;

@@ -68,7 +68,7 @@ public class SymbolManager : MonoBehaviour
         ArcMapManager.Instance.MiniSymbolCreator();
     }
 
-    /// When the clicked to add button event, in another name AddContentObject
+    /// When clicked to add button event, in another name AddContentObject
     public void AddSymbol()
     {
         Category category;

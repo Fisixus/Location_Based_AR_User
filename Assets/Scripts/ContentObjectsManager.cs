@@ -331,7 +331,7 @@ public class ContentObjectsManager : MonoBehaviour
             }
         }
     }
-    
+    /// Place and distance should change dynamically, there is no need to destroy and create every time for this
     private void LateUpdate()
     {
         if (isContentObjectCreated)
