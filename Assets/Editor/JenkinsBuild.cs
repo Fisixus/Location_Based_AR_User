@@ -76,7 +76,8 @@ public class JenkinsBuild {
      
             if (!allArgsFound)
                 System.Console.WriteLine("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod JenkinsBuild.BuildWindows64 <app name> <output dir>");
-     
+
+            System.Console.WriteLine("Appname:" + returnValue.appName + " dir:" + returnValue.targetDir); 
             return returnValue;
         }
      
