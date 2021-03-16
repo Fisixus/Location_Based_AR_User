@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -59,7 +58,7 @@ public class ContentObjectsManager : MonoBehaviour
             Debug.Log("Waiting connection!");
             return;
         }
-        symbols = JsonConvert.DeserializeObject<List<Symbol>>(data);
+        symbols = null;
 
         foreach(Symbol symbol in symbols)
         {

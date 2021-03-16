@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -177,7 +176,7 @@ public class SymbolManager : MonoBehaviour
         bool nameIsValid = true;
        
         string data = WebServiceManager.Instance.getSymbolsData();
-        List<Symbol> allUserSymbols= JsonConvert.DeserializeObject<List<Symbol>>(data);
+        List<Symbol> allUserSymbols= null;
 
         foreach(Symbol symbol in allUserSymbols)
         {
@@ -195,7 +194,7 @@ public class SymbolManager : MonoBehaviour
     {
         Symbol symbol = null;
         string data = WebServiceManager.Instance.getSymbolsData();
-        List<Symbol> userSymbols = JsonConvert.DeserializeObject<List<Symbol>>(data);
+        List<Symbol> userSymbols = null;
         for (int i = 0; i < userSymbols.Count; i++)
         {
             if (userSymbols[i].SymbolName.ToLower().Equals(name.ToLower()))

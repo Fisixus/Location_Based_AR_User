@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using Newtonsoft.Json;
 
 public enum Role
 {
@@ -75,4 +72,12 @@ public class User
     {
         return UUID + " " + Username + " " + Firstname + " " + Surname + " " + Latitude + " " + Longitude + " " + Altitude + " " + Online + " " + (int)Role + " " + SymbolUUIDs.Count;
     }
+}
+
+internal class JsonPropertyAttribute : Attribute
+{
+}
+
+public class JsonIgnoreAttribute : Attribute
+{
 }

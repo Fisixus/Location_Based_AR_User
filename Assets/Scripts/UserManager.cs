@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -49,7 +48,7 @@ public class UserManager : MonoBehaviour
     {
         string userUUID = string.Empty;
         string data = WebServiceManager.Instance.getAllUserData();
-        List<User> allUsers = JsonConvert.DeserializeObject<List<User>>(data);
+        List<User> allUsers = null;
         for (int i = 0; i < allUsers.Count; i++)
         {
             if (allUsers[i].Username.ToLower().Trim().Equals(symbolOwnerName.ToLower().Trim()))
@@ -65,7 +64,7 @@ public class UserManager : MonoBehaviour
     {
         string username = string.Empty;
         string data = WebServiceManager.Instance.getAllUserData();
-        List<User> allUsers = JsonConvert.DeserializeObject<List<User>>(data);
+        List<User> allUsers = null;
         for (int i = 0; i < allUsers.Count; i++)
         {
             if (allUsers[i].getUUID.Equals(userUUID))
@@ -81,7 +80,7 @@ public class UserManager : MonoBehaviour
     {
         User user = null;
         string data = WebServiceManager.Instance.getAllUserData();
-        List<User> allUsers = JsonConvert.DeserializeObject<List<User>>(data);
+        List<User> allUsers = null;
         for (int i = 0; i < allUsers.Count; i++)
         {
             if (allUsers[i].getUUID.Equals(info) || allUsers[i].Username.ToLower().Equals(info.ToLower()))
@@ -95,7 +94,7 @@ public class UserManager : MonoBehaviour
     public List<string> GetUsersSymbolNames(User dataUser)
     {
         string data = WebServiceManager.Instance.getAllSymbolsData();
-        List<Symbol> allSymbols = JsonConvert.DeserializeObject<List<Symbol>>(data);
+        List<Symbol> allSymbols = null;
         List<string> userSymbolNames = new List<string>();
 
         foreach (Symbol s in allSymbols)
@@ -127,7 +126,7 @@ public class UserManager : MonoBehaviour
             return;
         }
 
-        List<User> allUsers = JsonConvert.DeserializeObject<List<User>>(data);
+        List<User> allUsers = null;
         foreach (User user in allUsers)
         {
             if(user.Role != Role.Deleted)

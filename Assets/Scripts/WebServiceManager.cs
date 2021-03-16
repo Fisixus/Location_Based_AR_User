@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using Newtonsoft.Json;
 
 public class WebServiceManager : MonoBehaviour
 {
@@ -211,7 +210,7 @@ public class WebServiceManager : MonoBehaviour
 
     private IEnumerator AddUserRequest(User user)
     {
-        string data = JsonConvert.SerializeObject(user);
+        string data = "sa";
         /*
         using (UnityWebRequest request = UnityWebRequest.Put(AddUserURI, "{\"UUID\": \"UTKUID\"}"))
         */
@@ -235,7 +234,7 @@ public class WebServiceManager : MonoBehaviour
 
     private IEnumerator UpdateUserRequest(User user)
     {
-        string data = JsonConvert.SerializeObject(user);
+        string data = "sa";
         /*using (UnityWebRequest request = UnityWebRequest.Put(UpdateUserURI, "{\"UUID\": \"UTKUID\", \"Username\":\"Utku\", \"Firstname\":\"Erden\", \"Surname\":\"Utku\", \"Password\":\"a\", \"Latitude\":123.123, \"Longitude\":4323.123, \"Altitude\":122.13, \"Online\":true, \"Role\":\"Standart\"}"))
          */
         using (UnityWebRequest request = UnityWebRequest.Put(UpdateUserURI,data))
@@ -330,7 +329,7 @@ public class WebServiceManager : MonoBehaviour
 
     private IEnumerator AddSymbolRequest(Symbol symbol)
     {
-        string data = JsonConvert.SerializeObject(symbol);
+        string data = "sa";
         /*
         using (UnityWebRequest request = UnityWebRequest.Put(AddSymbolURI, "{\"UUID\": \"AZAZ\", \"UserUUID\":\"UTKUID\"}"))
         */
@@ -354,7 +353,7 @@ public class WebServiceManager : MonoBehaviour
 
     private IEnumerator UpdateSymbolRequest(Symbol symbol)
     {
-        string data = JsonConvert.SerializeObject(symbol);
+        string data = "sa";
         /*
         using (UnityWebRequest request = UnityWebRequest.Put(UpdateSymbolURI, "{\"UUID\": \"das\", \"SymbolName\":\"Kelebek\", \"Category\":\"Category\", \"Latitude\":1434.34, \"Longitude\":34.32, \"Altitude\":4342.12, \"Message\":\"Nays\"}"))
         */
