@@ -129,6 +129,6 @@ public class JenkinsBuild {
         private class Args
         {
             public string appName = "AppName";
-            public string targetDir = "~/Desktop";
+            public string targetDir = "~/Desktop/";
         }
     }   
